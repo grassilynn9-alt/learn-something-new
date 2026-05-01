@@ -7,17 +7,6 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:sans-serif;max-width:800px;margin:0 auto;padding:20px;background:#f5f5fa;padding-bottom:100px}
-.heat{background:#fff;border-radius:12px;padding:20px;margin-bottom:20px}
-.heat-bar{display:flex;gap:8px;justify-content:center;margin-bottom:10px}
-.heat-btn{width:32px;height:32px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer}
-.heat-date{text-align:center;color:#666;margin-bottom:10px}
-.heat-grid{display:grid;grid-template-columns:repeat(52,10px);grid-template-rows:repeat(7,10px);gap:1px;justify-content:center}
-.heat-cell{width:10px;height:10px;background:#ebedf0}
-.heat-cell.l1{background:#c6e8b8}
-.heat-cell.l2{background:#7bc96f}
-.heat-cell.l3{background:#239a3b}
-.heat-cell.l4{background:#196127}
-.heat-info{text-align:center;padding:10px;background:#f9f9fb;border-radius:8px;margin-top:10px}
 .catalog{background:#fff;border-radius:12px;padding:24px}
 .catalog h2{text-align:center;color:#2385bb;margin-bottom:20px}
 .item{padding:14px;background:#f0f7ff;border-radius:10px;margin-bottom:10px;cursor:pointer}
@@ -34,18 +23,6 @@ input{width:100px;padding:4px 6px;border:1px solid #999;border-radius:4px}
 </style>
 </head>
 <body>
-
-<div class="heat">
-<div class="heat-bar">
-<button class="heat-btn" id="yPrev">←</button>
-<button class="heat-btn" id="yReset">⟳</button>
-<button class="heat-btn" id="yNext">→</button>
-<span id="yShow">2026</span>
-</div>
-<div class="heat-date" id="today"></div>
-<div class="heat-grid" id="heatGrid"></div>
-<div class="heat-info" id="motivation"></div>
-</div>
 
 <div class="catalog" id="catalog">
 <h2>📚 文章目录</h2>
@@ -65,29 +42,20 @@ input{width:100px;padding:4px 6px;border:1px solid #999;border-radius:4px}
 <script>
 let articles = [];
 let current = null;
-let start = null;
 let save = JSON.parse(localStorage.getItem('save')) || {};
-let study = JSON.parse(localStorage.getItem('study')) || {};
-let year = new Date().getFullYear();
 
 window.onload = () => {
   fetch('articles.tsv')
     .then(res => res.text())
     .then(tsv => {
       const rows = tsv.split('\n').slice(1);
-      articles = rows.map(row => {
-        const [id, title, text, ans] = row.split('\t');
-        return { id: +id, title, text, ans: JSON.parse(ans) };
+      articles = rows.filter(r=>r.trim()).map(row => {
+        const [id, title, text, ansStr] = row.split('\t');
+        const ans = ansStr.split(',');
+        return { id: +id, title, text, ans };
       });
       initList();
-      initHeat();
-      updateInfo();
     });
-
-  document.getElementById('yPrev').onclick = () => { year--; initHeat(); };
-  document.getElementById('yNext').onclick = () => { year++; initHeat(); };
-  document.getElementById('yReset').onclick = () => { year = new Date().getFullYear(); initHeat(); };
-  window.addEventListener('beforeunload', () => { if (current) record(); });
 };
 
 function initList() {
@@ -102,9 +70,7 @@ function initList() {
 }
 
 function open(id) {
-  if (current) record();
   current = id;
-  start = Date.now();
   const art = articles.find(a => a.id === id);
   document.getElementById('catalog').style.display = 'none';
   document.getElementById('page').style.display = 'block';
@@ -120,7 +86,7 @@ function render(art) {
     return `
     <div class="input-group">
       <input type="text" data-i="${i}" value="${v}" oninput="sv(${art.id},${i},this.value)">
-      <button class="hint" onclick="ht(${art.id},${i})">💡</button>
+      <button class="hint" onclick="ht(${art.id},${i   我})">💡</button>
       <div class="ans" id="a${art.id}_${i}"></div>
     </div>`;
   });
@@ -134,34 +100,33 @@ function sv(aid, i, v) {
 }
 
 function back() {
-  record();
   current = null;
   document.getElementById('page').style.display = 'none';
   document.getElementById('catalog').style.display = 'block';
 }
 
-function check() {
-  const art = articles.find(a => a.id === current);
-  const inputs = document.querySelectorAll('input[data-i]');
-  let total = 0, right = 0, wrong = 0;
-  inputs.forEach(inp => {
-    const i = inp.dataset.i;
-    const v = inp.value.trim();
-    const ok = art.ans[i].match.includes(v);
-    total++;
-    ok ? right++ : wrong++;
+function check() {   函数check() {
+  const art = articles.find(a => a.id === current);Const art = articles.find(a   一个 => a   一个.d === current)；
+  const inputs = document.querySelectorAll('input[data-i]');const inputs = document   文档.querySelectorAll('input[data-i]')；
+  let total = 0, right = 0, wrong = 0;令total = 0, right   正确的 = 0, wrong = 0；
+  inputs.forEach(inp => {   输入。forEach(inp => {
+    const i = inp.dataset.i;   Const I   我 = inp. dataseti；
+    const v = inp.value.trim();   Const v = inp.value   价值.trim()；
+    const ok = art.ans[i] === v;   Const ok   好吧 = art。Ans [i   我] === v；
+    total++;   总;
+    ok ? right++ : wrong++;   好吗?正确的：错误的；
     inp.style.background = ok ? '#edfaf1' : '#fff0f0';
-    const ansBox = document.getElementById(`a${current}_${i}`);
-    ansBox.innerText = art.ans[i].show;
-    ansBox.style.display = 'block';
+    const ansBox = document.getElementById(`a${current}_${i}`);const ansBox = document   文档.getElementById(' a${current}_${i} ')；
+    ansBox.innerText = art.ans[i];ansBox。innerText = art.ans[i   我]；
+    ansBox.style.display = 'block';ansBox.style   风格.display   显示 = 'block'；
   });
-  const rate = total ? Math.round(right / total * 100) : 0;
-  document.getElementById('score').innerHTML = `📝 题数：${total}<br>✅ 正确：${right}<br>❌ 错误：${wrong}<br>🎯 正确率：${rate}%`;
-  document.getElementById('score').style.display = 'block';
+  const rate = total ? Math.round(right / total * 100) : 0;固定费率=总额？数学。圆（右/总数* 100）：0；
+  document.getElementById('score').innerHTML = `📝 题数：${total}<br>✅ 正确：${right}<br>❌ 错误：${wrong}<br>🎯 正确率：${rate}%`;document   文档.getElementById('score').innerHTML = `📝 题数：${total}<br>✅ 正确：${right   正确的}<br>❌ 错误：${wrong}<br>🎯 正确率：${rate}%`;
+  document.getElementById('score').style.display = 'block';.style   风格 . getelementbyid(“分数”)。Display = 'block'；
 }
 
-function reset() {
-  document.querySelectorAll('input[data-i]').forEach(inp => {
+function reset() {   函数reset() {
+  document.querySelectorAll('input[data-i]').forEach(inp => {document   文档.querySelectorAll(“输入[我]”)。forEach(inp => {
     inp.value = ''; inp.style.background = '';
     sv(current, inp.dataset.i, '');
   });
@@ -170,56 +135,8 @@ function reset() {
 }
 
 function ht(aid, i) {
-  alert('提示：' + articles.find(a   一个 => a   一个.id === aid).ans[i   我].show);
+  alert('提示：' + articles.find(a => a.id === aid).ans[i]);
 }
-
-function record() {
-  if (!start || !current) return;
-  const t = Date.now() - start;
-  const d = new Date();
-  const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,0)}-${String(d.getDate()).padStart(2,0)}`;
-  if (!study[current]) study[current] = {};
-  study[current][key] = (study[current][key] || 0) + t;
-  localStorage.setItem('study', JSON.stringify(study));
-  initHeat();
-  updateInfo();
-}
-
-function updateInfo() {
-  const d = new Date();
-  document.getElementById('today').innerText = `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
-  const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,0)}-${String(d.getDate()).padStart(2,0)}`;
-  let min = 0;
-  for (let k in study) if (study[k][key]) min += study[k][key] / 60000;
-  min = Math.round(min);
-  let txt = min === 0 ? '今日学习时长：0 分钟 💪' : `今日学习时长：${min} 分钟 🚀`;
-  document.getElementById('motivation').innerText = txt;
-}
-
-function initHeat() {
-  const g = document.getElementById('heatGrid');
-  g.innerHTML = '';
-  const days = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0 ? 366 : 365;
-  for (let r = 0; r < 7; r++) {
-    for (let c = 0; c < 52; c++) {
-      const cell = document.createElement('div');
-      cell.className = 'heat-cell';
-      const idx = c * 7 + r;
-      if (idx < days) {
-        const d = new Date(year, 0, idx + 1);
-        const k = `${year}-${String(d.getMonth()+1).padStart(2,0)}-${String(d.getDate()).padStart(2,0)}`;
-        let m = 0;
-        for (let id in study) if (study[id][k]) m += study[id][k] / 60000;
-        if (m >= 2) cell.classList.add('l1');
-        if (m   米 >= 5) cell.classList.add('l2');
-        if (m   米 >= 10) cell.classList.add('l3');
-        if (m   米 >= 15) cell.classList.add('l4');
-      }
-      g.appendChild(cell);
-    }
-  }
-  document.getElementById('yShow').innerText = year;
-}
-</script>
+</script>   < / script>
 </body>   身体< / >
 </html>
