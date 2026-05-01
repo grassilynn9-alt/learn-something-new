@@ -1,83 +1,141 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>日语完形填空练习</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #f5f5f5; padding-bottom: 120px; }
-        .heatmap-container { background: #fff; padding: 20px; border-radius: 8px; margin: 20px auto; max-width: 700px; }
-        .heatmap-controls { display: flex; justify-content: center; gap: 8px; margin-bottom: 10px; }
-        .heatmap-btn { width: 30px; height: 30px; border: 1px solid #ddd; background: #fff; border-radius: 4px; cursor: pointer; }
-        .heatmap-date { text-align: center; color: #666; margin-bottom: 10px; }
-        .heatmap-grid { display: grid; grid-template-columns: repeat(52, 10px); grid-template-rows: repeat(7, 10px); gap: 1px; justify-content: center; }
-        .heatmap-cell { width: 10px; height: 10px; background: #ebedf0; border-radius: 1px; }
-        .heatmap-cell.level1 { background: #c6e48b; }
-        .heatmap-cell.level2 { background: #7bc96f; }
-        .heatmap-cell.level3 { background: #239a3b; }
-        .heatmap-cell.level4 { background: #196127; }
-        .heatmap-motivation { text-align: center; padding: 12px; background: #f9f9f9; border-radius: 6px; margin-top: 10px; line-height: 1.5; }
-        .catalog { background: #fff; padding: 25px; border-radius: 8px; max-width: 700px; margin: 30px auto; }
-        .catalog h2 { text-align: center; color: #2385bb; margin-bottom: 20px; }
-        .article-item { padding: 14px 20px; background: #f6f9ff; border-radius: 10px; margin-bottom: 10px; cursor: pointer; font-size: 16px; }
-        .article-page { display: none; background: #fff; padding: 25px; border-radius: 8px; max-width: 700px; margin: 30px auto; }
-        .back-btn { background: #999; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-bottom: 20px; }
-        .sentence-box { font-size: 18px; line-height: 1.8; margin-bottom: 20px; }
-        .input-group { display: inline-block; position: relative; margin: 0 4px; }
-        input { width: 100px; padding: 4px 6px; border: 1px solid #999; border-radius: 4px; font-size: 16px; }
-        .correct-text { position: absolute; bottom: -22px; right: 0; color: #7f5fff; background: #f3f0ff; padding: 0 6px; border-radius: 3px; font-size: 14px; display: none; white-space: nowrap; }
-        .hint-btn { background: #ff9500; color: #fff; border: none; padding: 2px 6px; border-radius: 3px; font-size: 12px; cursor: pointer; margin-left: 4px; vertical-align: middle; }
-        .hint-text { position: absolute; top: -26px; left: 0; background: #e6f7ff; color: #2385bb; padding: 2px 6px; border-radius: 3px; font-size: 14px; display: none; white-space: nowrap; }
-        .floating-btn { position: fixed; bottom: 30px; right: 30px; background: #2385bb; color: #fff; padding: 14px 26px; border-radius: 50px; font-size: 16px; border: none; cursor: pointer; z-index: 999; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .resetBtn { background: #999; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 16px; margin-top: 10px; }
-        .score-box { background: #f6f9ff; padding: 15px; border-radius: 10px; margin: 20px 0; line-height: 1.8; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日语完形填空</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:sans-serif;max-width:800px;margin:0 auto;padding:20px;background:#f5f5fa;padding-bottom:100px}
+.catalog{background:#fff;border-radius:12px;padding:24px}
+.catalog h2{text-align:center;color:#2385bb;margin-bottom:20px}
+.item{padding:14px;background:#f0f7ff;border-radius:10px;margin-bottom:10px;cursor:pointer}
+.page{display:none;background:#fff;border-radius:12px;padding:24px}
+.back{background:#999;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;margin-bottom:20px}
+.text{font-size:17px;line-height:1.8;margin:20px 0}
+.input-group{display:inline-block;position:relative;margin:0 4px}
+input{width:100px;padding:4px 6px;border:1px solid #999;border-radius:4px}
+.ans{position:absolute;bottom:-22px;right:0;color:#7f5fff;background:#f3f0ff;padding:0 6px;border-radius:3px;display:none;white-space:nowrap}
+.hint{background:#ff9500;color:#fff;border:none;padding:2px 6px;border-radius:3px;font-size:12px;cursor:pointer}
+.check{position:fixed;bottom:30px;right:30px;background:#2385bb;color:#fff;padding:16px 24px;border-radius:50px;border:none;cursor:pointer;box-shadow:0 4px 12px #0003}
+.reset{background:#999;color:#fff;border:none;padding:10px 20px;border-radius:6px;cursor:pointer}
+.score{background:#f6f9ff;padding:16px;border-radius:10px;margin:20px 0}
+</style>
 </head>
 <body>
 
-<div class="heatmap-container">
-    <div class="heatmap-controls">
-        <button class="heatmap-btn" id="prevYearBtn">←</button>
-        <button class="heatmap-btn" id="resetYearBtn">⟳</button>
-        <button class="heatmap-btn" id="nextYearBtn">→</button>
-        <span id="currentHeatmapYear">2026</span>
-    </div>
-    <div class="heatmap-date" id="heatmapDate"></div>
-    <div class="heatmap-grid" id="heatmapGrid"></div>
-    <div class="heatmap-motivation" id="motivationText"></div>
+<div class="catalog" id="catalog">
+<h2>📚 文章目录</h2>
+<div id="list"></div>
 </div>
 
-<div class="catalog" id="catalogPage">
-    <h2>📚 日语完形填空 文章目录</h2>
-    <div class="article-item" onclick="openArticle(1)">文章 1：ツツジの前で立ち止まる</div>
+<div class="page" id="page">
+<button class="back" onclick="back()">← 返回目录</button>
+<h3 id="title" style="text-align:center;margin-bottom:20px"></h3>
+<div class="text" id="content"></div>
+<div class="score" id="score" style="display:none"></div>
+<button class="reset" onclick="reset()">清空答案</button>
 </div>
 
-<div class="article-page" id="article1">
-    <button class="back-btn" onclick="backToCatalog()">← 返回目录</button>
-    <h3 style="text-align:center; margin-bottom:20px;">ツツジの前で立ち止まる</h3>
-    <div class="sentence-box" id="sentence1">
-ツツジが美しい{{c1::季節}}だ。漢字では躑躅と{{c2::書く}}。漢和辞典を{{c3::ひく}}と、躑｜てきも躅｜ちょくも「たたずむ」や「立ち止まる」{{c4::という}}意味だとか。なるほど。では、文字{{c5::通り}}ちょっと足を{{c6::止めて}}、咲き誇る花に目を{{c7::こらして}}みよう▼
-改めて{{c8::気づく}}のは、上の方の花びら{{c9::だけ}}に色の濃い斑点{{c10::がある}}ことだ。蜜標｜みつひょう{{c11::と呼ぶ}}そうだ。この奥に甘い{{c12::蜜がある}}よ、と虫たちに{{c13::伝える}}目印になっていると田中肇著『花と昆虫、不思議なだましあい発見記』{{c14::に}}教わった▼
-多くの花の中から目印に{{c15::誘われた}}チョウは、蜜を{{c16::吸い}}ながらヒラヒラ{{c17::と}}羽を{{c18::動かす}}。その時、おしべから花粉が{{c19::つく}}。そして別の花へ運んで{{c20::いく}}。いつ誰が考えついたのか、{{c21::なんと}}巧妙な仕組み{{c22::だろう}}▼
-虫との駆け引き{{c23::なら}}ツユクサも負けていない。青い花びらに{{c24::映える}}鮮やかな黄色の{{c25::おしべ}}。「おいしい花粉に{{c26::ありつけ}}そうだ」と虫が{{c27::引き寄せられる}}。でも、あれは飾り{{c28::に過ぎない}}。{{c29::そり返った}}地味なおしべの先が食いしん坊の腹に{{c30::触れ}}、{{c31::こっそり}}花粉をつける▼
-{{c32::さて}}、こうしたドラマに心を躍らせることが遠い未来も{{c33::できる}}のか。いま{{c34::危うい}}ところにいるのかもしれない。世界各地で虫が{{c35::静かに}}姿を消している。英国では先月、{{c36::飛ぶ}}虫の数が２０２１年から昨年{{c37::まで}}で６割{{c38::減った}}という発表があった。研究チームが市民の協力を{{c39::得て}}、{{c40::走る}}車のナンバーにぶつかった虫の数を{{c41::数えた}}▼
-気候変動や農薬{{c42::など}}、{{c43::様々}}な要因があるのだろう。このままでいいのか。一度「立ち止まる」。その{{c44::必要}}があると思う。
-    </div>
-    <div class="score-box" id="scoreBox1" style="display:none;"></div>
-    <button class="resetBtn" onclick="resetArticle(1)">清空答案 🔄</button>
-</div>
-
-<button class="floating-btn" id="checkBtn">检查答案 🔍</button>
+<button class="check" onclick="check()">检查答案</button>
 
 <script>
-let studyData = JSON.parse(localStorage.getItem('japaneseStudyData')) || {};
-let saveData = JSON.parse(localStorage.getItem('japaneseSaveData')) || {1:{}};
-let currentArticle = null;
-let startTime = null;
-let currentDisplayYear = new Date().getFullYear();
+// 文章数据
+const articles = [
+  {
+    id: 1,
+    title: "ツツジの前で立ち止まる",
+    text: "ツツジが美しい{{c1::季節}}だ。漢字では躑躅と{{c2::書く}}。漢和辞典を{{c3::ひく}}と、躑｜てきも躅｜ちょくも「たたずむ」や「立ち止まる」{{c4::という}}意味だとか。なるほど。では、文字{{c5::通り}}ちょっと足を{{c6::止めて}}、咲き誇る花に目を{{c7::こらして}}みよう。改めて{{c8::気づく}}のは、上の方の花びら{{c9::だけ}}に色の濃い斑点{{c10::がある}}ことだ。蜜標｜みつひょう{{c11::と呼ぶ}}そうだ。この奥に甘い{{c12::蜜がある}}よ、と虫たちに{{c13::伝える}}目印になっていると田中肇著『花と昆虫、不思議なだましあい発見記』{{c14::に}}教わった。多くの花の中から目印に{{c15::誘われた}}チョウは、蜜を{{c16::吸い}}ながらヒラヒラ{{c17::と}}羽を{{c18::動かす}}。その時、おしべから花粉が{{c19::つく}}。そして別の花へ運んで{{c20::いく}}。いつ誰が考えついたのか、{{c21::なんと}}巧妙な仕組み{{c22::だろう}}。虫との駆け引き{{c23::なら}}ツユクサも負けていない。青い花びらに{{c24::映える}}鮮やかな黄色の{{c25::おしべ}}。「おいしい花粉に{{c26::ありつけ}}そうだ」と虫が{{c27::引き寄せられる}}。でも、あれは飾り{{c28::に過ぎない}}。{{c29::そり返った}}地味なおしべの先が食いしん坊の腹に{{c30::触れ}}、{{c31::こっそり}}花粉をつける。{{c32::さて}}、こうしたドラマに心を躍らせることが遠い未来も{{c33::できる}}のか。いま{{c34::危うい}}ところにいるのかもしれない。世界各地で虫が{{c35::静かに}}姿を消している。英国では先月、{{c36::飛ぶ}}虫の数が２０２１年から昨年{{c37::まで}}で６割{{c38::減った}}という発表があった。研究チームが市民の協力を{{c39::得て}}、{{c40::走る}}車のナンバーにぶつかった虫の数を{{c41::数えた}}。気候変動や農薬{{c42::など}}、{{c43::様々}}な要因があるのだろう。このままでいいのか。一度「立ち止まる」。その{{c44::必要}}があると思う。",
+    ans: ["季節","書く","ひく","という","通り","止めて","こらして","気づく","だけ","がある","と呼ぶ","蜜がある","伝える","に","誘われた","吸い","と","動かす","つく","いく","なんと","だろう","なら","映える","おしべ","ありつけ","引き寄せられる","に過ぎない","そり返った","触れ","こっそり","さて","できる","危うい","静かに","飛ぶ","まで","減った","得て","走る","数えた","など","様々","必要"]
+  }
+];
 
-const articleAnswers = {
-    1: [
-        { match: ["季節","きせつ"], show:"季節" },{ match: ["書く","かく"], show:"書く" },{ match: ["ひく","引く"], show:"ひく" },
-        { match: ["という"], show:"という" },{ match: ["通り","とおり"], show:"通り" },{ match: ["止めて","とめて"], show:"
+let current = null;
+let save = JSON.parse(localStorage.getItem('save')) || {};
+
+window.onload = () => {
+  initList();
+};
+
+function initList() {
+  const list = document.getElementById('list');
+  articles.forEach(art => {
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.innerText = `${art.id}：${art.title}`;
+    div.onclick = () => open(art.id);
+    list.appendChild(div);
+  });
+}
+
+function open(id) {
+  current = id;
+  const art = articles.find(a => a.id === id);
+  document.getElementById('catalog').style.display = 'none';
+  document.getElementById('page').style.display = 'block';
+  document.getElementById('title').innerText = art.title;
+  render(art);
+}
+
+function render(art) {
+  const box = document.getElementById('content');
+  let html = art.text.replace(/\{\{c(\d+)::.*?\}\}/g, (m, n) => {
+    const i = n - 1;
+    const v = save[art.id]?.[i] || '';
+    return `
+    <div class="input-group">
+      <input type="text" data-i="${i}" value="${v}" oninput="sv(${art.id},${i},this.value)">
+      <button class="hint" onclick="ht(${art.id},${i})">💡</button>
+      <div class="ans" id="a${art.id}_${i}"></div>
+    </div>`;
+  });
+  box.innerHTML = html;
+}
+
+function sv(aid, i, v) {
+  if (!save[aid]) save[aid] = {};
+  save[aid][i] = v;
+  localStorage.setItem('save', JSON.stringify(save));
+}
+
+function back() {
+  current = null;
+  document.getElementById('page').style.display = 'none';
+  document.getElementById('catalog').style.display = 'block';
+}
+
+function check() {
+  const art = articles.find(a => a.id === current);
+  const inputs = document.querySelectorAll('input[data-i]');
+  let total = 0, right = 0, wrong = 0;
+  inputs.forEach(inp => {
+    const i = inp.dataset.i;
+    const v = inp.value.trim();
+    const ok = art.ans[i] === v;
+    total++;
+    ok ? right++ : wrong++;
+    inp.style.background = ok ? '#edfaf1' : '#fff0f0';
+    const ansBox = document.getElementById(`a${current}_${i}`);
+    ansBox.innerText = art.ans[i];
+    ansBox.style.display = 'block';
+  });
+  const rate = total ? Math.round(right / total * 100) : 0;
+  document.getElementById('score').innerHTML = `📝 题数：${total}<br>✅ 正确：${right}<br>❌ 错误：${wrong}<br>🎯 正确率：${rate}%`;
+  document.getElementById('score').style.display = 'block';
+}
+
+function reset() {
+  document.querySelectorAll('input[data-i]').forEach(inp => {
+    inp.value = ''; inp.style.background = '';
+    sv(current, inp.dataset.i, '');
+  });
+  document.querySelectorAll('.ans').forEach(e => e.style.display = 'none');
+  document.getElementById('score').style.display = 'none';
+}
+
+function ht(aid, i) {
+  alert('提示：' + articles.find(a => a.id === aid).ans[i]);
+}
+</script>
+</body>
+</html>
