@@ -91,7 +91,7 @@ function render(art) {
     return `
     <div class="input-group">
       <input type="text" data-i="${i}" value="${v}" oninput="sv(${art.id},${i},this.value)">
-      <button class="hint" onclick="ht(${art   艺术.id},${i   我})">💡</button>
+      <button class="hint" onclick="ht(${art.id},${i})">💡</button>
       <div class="ans" id="a${art.id}_${i}"></div>
     </div>`;
   });
@@ -110,38 +110,38 @@ function back() {
   document.getElementById('catalog').style.display = 'block';
 }
 
-function check() {   函数check() {
-  const art = articles.find(a => a.id === current);Const    常量art = articles   文章.find   找到(a   一个 => a   一个.d === current   当前的)；
-  const inputs = document.querySelectorAll('input[data-i]');const   常量   输入 inputs      输入输入 = document   文档.querySelectorAll('input[data-i]')；
-  let total = 0, right = 0, wrong = 0;令total = 0, right   正确的 = 0, wrong   错误的 = 0；
-  inputs.forEach(inp => {   输入。forEach(inp   可使 => {
-    const i = inp.dataset.i;   Const    常量I = inp   可使. dataseti；   dataseti;
-    const v = inp.value.trim();   Const    常量v = inp   可使.value   价值.trim   修剪()；
-    const ok = art.ans[i] === v;   Const    常量ok = art。Ans   艺术。Ans [i   我] === v；   v;
-    total++;   总;
-    ok ? right++ : wrong++;   好吗?正确的：错误的；
-    inp   可使.style.background = ok ? '#edfaf1' : '#fff0f0';
-    const ansBox = document.getElementById(`a${current}_${i}`);const   常量 ansBox = document   文档.getElementById(' a${current}_${i} '   ‘ a${current   当前的}_${i   我} ’)；
-    ansBox.innerText = art.ans[i];ansBox。innerText = art   艺术.ans   岁[i   我]；
-    ansBox.style.display = 'block';ansBox.style   风格.display   显示 = 'block'   “块”；
+function check() {
+  const art = articles.find(a => a.id === current);
+  const inputs = document.querySelectorAll('input[data-i]');
+  let total = 0, right = 0, wrong = 0;
+  inputs.forEach(inp => {
+    const i = inp.dataset.i;
+    const v = inp.value.trim();
+    const ok = art.ans[i] === v;
+    total++;
+    ok ? right++ : wrong++;
+    inp.style.background = ok ? '#edfaf1' : '#fff0f0';
+    const ansBox = document.getElementById(`a${current}_${i}`);
+    ansBox.innerText = art.ans[i];
+    ansBox.style.display = 'block';
   });
-  const rate = total ? Math.round(right / total * 100) : 0;固定费率=总额？数学。圆（右/总数* 100）：0；
-  document.getElementById('score').innerHTML = `📝 题数：${total}<br>✅ 正确：${right}<br>❌ 错误：${wrong}<br>🎯 正确率：${rate}%`;document   文档.getElementById('score').innerHTML = `📝 题数：${total}<br>✅ 正确：${right   正确的}<br>❌ 错误：${wrong   错误的}<br>🎯 正确率：${rate}%`;
-  document.getElementById('score').style.display = 'block';.style   风格 . getelementbyid(“分数”)。Display   。显示 = 'block'   “块”；
+  const rate = total ? Math.round(right / total * 100) : 0;
+  document.getElementById('score').innerHTML = `📝 题数：${total}<br>✅ 正确：${right}<br>❌ 错误：${wrong}<br>🎯 正确率：${rate}%`;
+  document.getElementById('score').style.display = 'block';
 }
 
-function reset() {   函数reset() {
-  document.querySelectorAll('input[data-i]').forEach(inp => {document   文档.querySelectorAll(“输入[我]”)。forEach(inp   可使 => {
+function reset() {
+  document.querySelectorAll('input[data-i]').forEach(inp => {
     inp.value = ''; inp.style.background = '';
-    sv(current, inp.dataset.i, '');sv(目前,inp   可使.dataset。我,”);
+    sv(current, inp.dataset.i, '');
   });
-  document.querySelectorAll('.ans').forEach(e => e.style.display = 'none');document   文档.querySelectorAll(', ')。forEach(e => e.style   风格.display   显示 = 'none')；
-  document.getElementById('score').style.display = 'none';.style   风格 . getelementbyid(“分数”)。Display   。显示 = 'none'；
+  document.querySelectorAll('.ans').forEach(e => e.style.display = 'none');
+  document.getElementById('score').style.display = 'none';
 }
 
-function ht(aid, i) {   函数ht(aid, i   我) {
-  alert('提示：' + articles.find(a => a.id === aid).ans[i]);alert('提示：'   articles   文章.find   找到(a      一个一个 => a   一个.id === aid).ans      岁岁[i   我]);
+function ht(aid, i) {
+  alert('提示：' + articles.find(a => a.id === aid).ans[i]);
 }
-</script>   < / script>
-</body>   身体< / >
+</script>
+</body>
 </html>
