@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>日语完形填空</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5fa;
+            padding-bottom: 100px
+        }
+
+        .heat {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px
+        }
+
+        .heat-bar {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 10px
+        }
+
+        .heat-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #fff;
+            cursor: pointer
+        }
+
+        .heat-date {
+            text-align: center;
+            color: #666;
+            margin-bottom: 10px
+        }
+
+        .heat-grid {
+            display: grid;
+            grid-template-columns: repeat(52, 10px);
+            grid-template-rows: repeat(7, 10px);
+            gap: 1px;
+            justify-content: center
+        }
+
+        .heat-cell {
+            width: 10px;
+            height: 10px;
+            background: #ebedf0
+        }
+
+        .heat-cell.l1 {
+            background: #c6e8b
+        }
+
+        .heat-cell.l2 {
+            background: #7bc96f
+        }
+
+        .heat-cell.l3 {
+            background: #239a3b
+        }
+
+        .heat-cell.l4 {
+            background: #196127
+        }
+
+        .heat-info {
+            text-align: center;
+            padding: 10px;
+            background: #f9f9fb;
+            border-radius: 8px;
+            margin-top: 10px
+        }
+
+        .catalog {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px
+        }
+
+        .catalog h2 {
+            text-align: center;
+            color: #2385bb;
+            margin-bottom: 20px
+        }
+
+        .item {
+            padding: 14px;
+            background: #f0f7ff;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer
+        }
+
+        .page {
+            display: none;
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px
+        }
+
+        .back {
+            background: #999;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 20px
+        }
+
+        .text {
+            font-size: 17px;
+            line-height: 1.8;
+            margin: 20px 0
+        }
+
+        .input-group {
+            display: inline-block;
+            position: relative;
+            margin: 0 4px
+        }
+
+        input {
+            width: 100px;
+            padding: 4px 6px;
+            border: 1px solid #999;
+            border-radius: 4px
+        }
+
+        .ans {
+            position: absolute;
+            bottom: -22px;
+            right: 0;
+            color: #7f5fff;
+            background: #f3f0ff;
+            padding: 0 6px;
+            border-radius: 3px;
+            display: none;
+            white-space: nowrap
+        }
+
+        .hint {
+            background: #ff9500;
+            color: #fff;
+            border: none;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer
+        }
+
+        .check {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #2385bb;
+            color: #fff;
+            padding: 16px 24px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px #0003
+        }
+
+        .reset {
+            background: #999;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer
+        }
+
+        .score {
+            background: #f6f9ff;
+            padding: 16px;
+            border-radius: 10px;
+            margin: 20px 0
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="heat">
+        <div class="heat-bar">
+            <button class="heat-btn" id="yPrev">←</button>
+            <button class="heat-btn" id="yReset">⟳</button>
+            <button class="heat-btn" id="yNext">→</button>
+            <span id="yShow">2026</span>
+        </div>
+        <div class="heat-date" id="today"></div>
+        <div class="heat-grid" id="heatGrid"></div>
+        <div class="heat-info" id="motivation"></div>
+    </div>
+
+    <div class="catalog" id="catalog">
+        <h2>📚 文章目录</h2>
+        <div id="list"></div>
+    </div>
+
+    <div class="page" id="page">
+        <button class="back" onclick="back()">← 返回目录</button>
+        <h3 id="title" style="text-align:center;margin-bottom:20px"></h3>
+        <div class="text" id="content"></div>
+        <div class="score" id="score" style="display:none"></div>
+        <button class="reset" onclick="reset()">清空答案</button>
+    </div>
+
+    <button class="check" onclick="check()">检查答案</button>
+
+    <script>
+        let articles = [];
+        let current = null;
+        let start = null;
+        let save = JSON.parse(localStorage.getItem('save')) || {};
+        let study = JSON.parse(localStorage.getItem('study')) || {};
+        let year = new Date().getFullYear();
+
+        window.onload = () => {
+            fetch('articles.csv')
+                .then(res => res.text())
+                .then(csv => {
+                    const rows = csv.split('\n').slice(1);
+                    articles = rows.map(row => {
+                        const [id, title, text, ans] = row.split(/,(?=\[)/);
+                        return { id: +id, title, text, ans: JSON.parse(ans) };
+                    });
+                    initList();
+                    initHeat();
+                    updateInfo();
+                });
+
+            document.getElementById('yPrev').onclick = () => { year--; initHeat(); };
+            document.getElementById('yNext').onclick = () => { year++; initHeat(); };
+            document.getElementById('yReset').onclick = () => { year = new Date().getFullYear(); initHeat(); };
+            window.addEventListener('beforeunload', () => { if (current) record(); });
+        };
+
+        function initList() {
+            const list = document.getElementById('list');
+            articles.forEach(art => {
+                const div = document.createElement('div');
+                div.className = 'item';
+                div.innerText = `${art.id}：${art.title}`;
+                div.onclick = () => open(art.id);
+                list.appendChild(div);
+            });
+        }
+
+        function open(id) {
+            if (current) record();
+            current = id;
+            start = Date.now();
+            const art = articles.find(a => a.id === id);
+            document.getElementById('catalog').style.display = 'none';
+            document.getElementById('page').style.display = 'block';
+            document.getElementById('title').innerText = art.title;
+            render(art);
+        }
+
+        function render(art) {
+            const box = document.getElementById('content');
+            let html = art.text.replace(/\{\{c(\d+)::.*?\}\}/g, (m, n) => {
+                const i = n - 1;
+                const v = save[art.id]?.[i] || '';
+                return `
+    <div class="input-group">
+      <input type="text" data-i="${i}" value="${v}" oninput="sv(${art.id},${i},this.value)">
+      <button class="hint" onclick="ht(${art.id},${i})">💡</button>
+      <div class="ans" id="a${art.id}_${i}"></div>
+    </div>`;
+            });
+            box.innerHTML = html;
+        }
+
+        function sv(aid, i, v) {
+            if (!save[aid]) save[aid] = {};
+            save[aid][i] = v;
+            localStorage.setItem('save', JSON.stringify(save));
+        }
+
+        function back() {
+            record();
+            current = null;
+            document.getElementById('page').style.display = 'none';
+            document.getElementById('catalog').style.display = 'block';
+        }
+
+        function check() {
+            const art = articles.find(a => a.id === current);
+            const inputs = document.querySelectorAll('input[data-i]');
+            let total = 0, right = 0, wrong = 0;
+            inputs.forEach(inp => {
+                const i = inp.dataset.i;
+                const v = inp.value.trim();
+                const ok = art.ans[i].match.includes(v);
+                total++;
+                ok ? right++ : wrong++;
+                inp.style.background = ok ? '#edfaf1' : '#fff0f0';
+                const ansBox = document.getElementById(`a${current}_${i}`);
+                ansBox.innerText = art.ans[i].show;
+                ansBox.style.display = 'block';
+            });
+            const rate = total ? Math.round(right / total * 100) : 0;
+            document.getElementById('score').innerHTML = `📝 题数：${total}<br>✅ 正确：${right}<br>❌ 错误：${wrong}<br>🎯 正确率：${rate}%`;
+            document.getElementById('score').style.display = 'block';
+        }
+
+        function reset() {
+            document.querySelectorAll('input[data-i]').forEach(inp => {
+                inp.value = ''; inp.style.background = '';
+                sv(current, inp.dataset.i, '');
+            });
+            document.querySelectorAll('.ans').forEach(e => e.style.display = 'none');
+            document.getElementById('score').style.display = 'none';
+        }
+
+        function ht(aid, i) {
+            alert('提示：' + articles.find(a => a.id === aid).ans[i].show);
+        }
+
+        function record() {
+            if (!start || !current) return;
+            const t = Date.now() - start;
+            const d = new Date();
+            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, 0)}-${String(d.getDate()).padStart(2, 0)}`;
+            if (!study[current]) study[current] = {};
+            study[current][key] = (study[current][key] || 0) + t;
+            localStorage.setItem('study', JSON.stringify(study));
+            initHeat();
+            updateInfo();
+        }
+
+        function updateInfo() {
+            const d = new Date();
+            document.getElementById('today').innerText = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, 0)}-${String(d.getDate()).padStart(2, 0)}`;
+            let min = 0;
+            for (let k in study) if (study[k][key]) min += study[k][key] / 60000;
+            min = Math.round(min);
+            let txt = min === 0 ? '今日学习时长：0 分钟 💪' : `今日学习时长：${min} 分钟 🚀`;
+            document.getElementById('motivation').innerText = txt;
+        }
+
+        function initHeat() {
+            const g = document.getElementById('heatGrid');
+            g.innerHTML = '';
+            const days = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0 ? 366 : 365;
+            for (let r = 0; r < 7; r++) {
+                for (let c = 0; c < 52; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'heat-cell';
+                    const idx = c * 7 + r;
+                    if (idx < days) {
+                        const d = new Date(year, 0, idx + 1);
+                        const k = `${year}-${String(d.getMonth() + 1).padStart(2, 0)}-${String(d.getDate()).padStart(2, 0)}`;
+                        let m = 0;
+                        for (let id in study) if (study[id][k]) m += study[id][k] / 60000;
+                        if (m >= 2) cell.classList.add('l1');
+                        if (m >= 5) cell.classList.add('l2');
+                        if (m >= 10) cell.classList.add('l3');
+                        if (m >= 15) cell.classList.add('l4');
+                    }
+                    g.appendChild(cell);
+                }
+            }
+            document.getElementById('yShow').innerText = year;
+        }
+    </script>
+</body>
+
+</html>
