@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>日语完形填空</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -63,7 +63,6 @@ input{width:100px;padding:4px 6px;border:1px solid #999;border-radius:4px}
 <button class="check" onclick="check()">检查答案</button>
 
 <script>
-// 文章数据
 const articles = [
   {
     id: 1,
@@ -169,7 +168,7 @@ function ht(aid, i) {
   alert('提示：' + articles.find(a => a.id === aid).ans[i]);
 }
 
-// 热力图功能
+// 热力图
 document.getElementById('yPrev').onclick = () => { year--; initHeat(); };
 document.getElementById('yNext').onclick = () => { year++; initHeat(); };
 document.getElementById('yReset').onclick = () => { year = new Date().getFullYear(); initHeat(); };
@@ -179,24 +178,24 @@ function initHeat() {
   const grid = document.getElementById('heatGrid');
   grid.innerHTML = '';
   const start = new Date(year, 0, 1);
-  const days = [];
-  for (let i = 0; i < 365; i++) {
-    const d = new Date(start);
-    d.setDate(d.getDate() + i);
-    days.push(d.toISOString().split('T')[0]);
-  }
-  days.forEach(day => {
-    const cell = document.createElement('div');
-    cell.className = 'heat-cell';
-    const count = study[day] || 0;
-    if (count > 0) {
-      if (count >= 4) cell.classList.add('l4');
-      else if (count >= 3) cell.classList.add('l3');
-      else if (count >= 2) cell.classList.add('l2');
-      else cell.classList.add('l1');
+  for (let w = 0; w < 52; w++) {
+    for (let d = 0; d < 7; d++) {
+      const date = new Date(start);
+      date.setDate(date.getDate() + (w * 7 + d));
+      if (date.getFullYear() !== year) continue;
+      const cell = document.createElement('div');
+      cell.className = 'heat-cell';
+      const key = date.toISOString().split('T')[0];
+      const count = study[key] || 0;
+      if (count > 0) {
+        if (count >= 4) cell.classList.add('l4');
+        else if (count >= 3) cell.classList.add('l3');
+        else if (count >= 2) cell.classList.add('l2');
+        else cell.classList.add('l1');
+      }
+      grid.appendChild(cell);
     }
-    grid.appendChild(cell);
-  });
+  }
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('today').innerText = `${today} | 今日学习次数：${study[today] || 0}`;
   const total = Object.values(study).reduce((a,b)=>a+b,0);
