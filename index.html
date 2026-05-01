@@ -40,22 +40,27 @@ input{width:100px;padding:4px 6px;border:1px solid #999;border-radius:4px}
 <button class="check" onclick="check()">检查答案</button>
 
 <script>
-let articles = [];
+// 文章直接写在这里，不用任何外部文件！
+const articles = [
+  {
+    id: 1,
+    title: "ツツジの前で立ち止まる",
+    text: `ツツジが美しい{{c1::季節}}だ。漢字では躑躅と{{c2::書く}}。漢和辞典を{{c3::ひく}}と、躑｜てきも躅｜ちょくも「たたずむ」や「立ち止まる」{{c4::という}}意味だとか。なるほど。では、文字{{c5::通り}}ちょっと足を{{c6::止めて}}、咲き誇る花に目を{{c7::こらして}}みよう。改めて{{c8::気づく}}のは、上の方の花びら{{c9::だけ}}に色の濃い斑点{{c10::がある}}ことだ。蜜標｜みつひょう{{c11::と呼ぶ}}そうだ。この奥に甘い{{c12::蜜がある}}よ、と虫たちに{{c13::伝える}}目印になっていると田中肇著『花と昆虫、不思議なだましあい発見記』{{c14::に}}教わった。多くの花の中から目印に{{c15::誘われた}}チョウは、蜜を{{c16::吸い}}ながらヒラヒラ{{c17::と}}羽を{{c18::動かす}}。その時、おしべから花粉が{{c19::つく}}。そして別の花へ運んで{{c20::いく}}。いつ誰が考えついたのか、{{c21::なんと}}巧妙な仕組み{{c22::だろう}}。虫との駆け引き{{c23::なら}}ツユクサも負けていない。青い花びらに{{c24::映える}}鮮やかな黄色の{{c25::おしべ}}。「おいしい花粉に{{c26::ありつけ}}そうだ」と虫が{{c27::引き寄せられる}}。でも、あれは飾り{{c28::に過ぎない}}。{{c29::そり返った}}地味なおしべの先が食いしん坊の腹に{{c30::触れ}}、{{c31::こっそり}}花粉をつける。{{c32::さて}}、こうしたドラマに心を躍らせることが遠い未来も{{c33::できる}}のか。いま{{c34::危うい}}ところにいるのかもしれない。世界各地で虫が{{c35::静かに}}姿を消している。英国では先月、{{c36::飛ぶ}}虫の数が２０２１年から昨年{{c37::まで}}で６割{{c38::減った}}という発表があった。研究チームが市民の協力を{{c39::得て}}、{{c40::走る}}車のナンバーにぶつかった虫の数を{{c41::数えた}}。気候変動や農薬{{c42::など}}、{{c43::様々}}な要因があるのだろう。このままでいいのか。一度「立ち止まる」。その{{c44::必要}}があると思う。`,
+    ans: [
+      "季節", "書く", "ひく", "という", "通り", "止めて", "こらして", "気づく", "だけ", "がある",
+      "と呼ぶ", "蜜がある", "伝える", "に", "誘われた", "吸い", "と", "動かす", "つく", "いく",
+      "なんと", "だろう", "なら", "映える", "おしべ", "ありつけ", "引き寄せられる", "に過ぎない",
+      "そり返った", "触れ", "こっそり", "さて", "できる", "危うい", "静かに", "飛ぶ", "まで",
+      "減った", "得て", "走る", "数えた", "など", "様々", "必要"
+    ]
+  }
+];
+
 let current = null;
 let save = JSON.parse(localStorage.getItem('save')) || {};
 
 window.onload = () => {
-  fetch('articles.tsv')
-    .then(res => res.text())
-    .then(tsv => {
-      const rows = tsv.split('\n').slice(1);
-      articles = rows.filter(r=>r.trim()).map(row => {
-        const [id, title, text, ansStr] = row.split('\t');
-        const ans = ansStr.split(',');
-        return { id: +id, title, text, ans };
-      });
-      initList();
-    });
+  initList();
 };
 
 function initList() {
@@ -86,7 +91,7 @@ function render(art) {
     return `
     <div class="input-group">
       <input type="text" data-i="${i}" value="${v}" oninput="sv(${art.id},${i},this.value)">
-      <button class="hint" onclick="ht(${art.id},${i   我})">💡</button>
+      <button class="hint" onclick="ht(${art   艺术.id},${i   我})">💡</button>
       <div class="ans" id="a${art.id}_${i}"></div>
     </div>`;
   });
@@ -106,36 +111,36 @@ function back() {
 }
 
 function check() {   函数check() {
-  const art = articles.find(a => a.id === current);Const art = articles.find(a   一个 => a   一个.d === current)；
-  const inputs = document.querySelectorAll('input[data-i]');const inputs = document   文档.querySelectorAll('input[data-i]')；
-  let total = 0, right = 0, wrong = 0;令total = 0, right   正确的 = 0, wrong = 0；
-  inputs.forEach(inp => {   输入。forEach(inp => {
-    const i = inp.dataset.i;   Const I   我 = inp. dataseti；
-    const v = inp.value.trim();   Const v = inp.value   价值.trim()；
-    const ok = art.ans[i] === v;   Const ok   好吧 = art。Ans [i   我] === v；
+  const art = articles.find(a => a.id === current);Const    常量art = articles   文章.find   找到(a   一个 => a   一个.d === current   当前的)；
+  const inputs = document.querySelectorAll('input[data-i]');const   常量   输入 inputs      输入输入 = document   文档.querySelectorAll('input[data-i]')；
+  let total = 0, right = 0, wrong = 0;令total = 0, right   正确的 = 0, wrong   错误的 = 0；
+  inputs.forEach(inp => {   输入。forEach(inp   可使 => {
+    const i = inp.dataset.i;   Const    常量I = inp   可使. dataseti；   dataseti;
+    const v = inp.value.trim();   Const    常量v = inp   可使.value   价值.trim   修剪()；
+    const ok = art.ans[i] === v;   Const    常量ok = art。Ans   艺术。Ans [i   我] === v；   v;
     total++;   总;
     ok ? right++ : wrong++;   好吗?正确的：错误的；
-    inp.style.background = ok ? '#edfaf1' : '#fff0f0';
-    const ansBox = document.getElementById(`a${current}_${i}`);const ansBox = document   文档.getElementById(' a${current}_${i} ')；
-    ansBox.innerText = art.ans[i];ansBox。innerText = art.ans[i   我]；
-    ansBox.style.display = 'block';ansBox.style   风格.display   显示 = 'block'；
+    inp   可使.style.background = ok ? '#edfaf1' : '#fff0f0';
+    const ansBox = document.getElementById(`a${current}_${i}`);const   常量 ansBox = document   文档.getElementById(' a${current}_${i} '   ‘ a${current   当前的}_${i   我} ’)；
+    ansBox.innerText = art.ans[i];ansBox。innerText = art   艺术.ans   岁[i   我]；
+    ansBox.style.display = 'block';ansBox.style   风格.display   显示 = 'block'   “块”；
   });
   const rate = total ? Math.round(right / total * 100) : 0;固定费率=总额？数学。圆（右/总数* 100）：0；
-  document.getElementById('score').innerHTML = `📝 题数：${total}<br>✅ 正确：${right}<br>❌ 错误：${wrong}<br>🎯 正确率：${rate}%`;document   文档.getElementById('score').innerHTML = `📝 题数：${total}<br>✅ 正确：${right   正确的}<br>❌ 错误：${wrong}<br>🎯 正确率：${rate}%`;
-  document.getElementById('score').style.display = 'block';.style   风格 . getelementbyid(“分数”)。Display = 'block'；
+  document.getElementById('score').innerHTML = `📝 题数：${total}<br>✅ 正确：${right}<br>❌ 错误：${wrong}<br>🎯 正确率：${rate}%`;document   文档.getElementById('score').innerHTML = `📝 题数：${total}<br>✅ 正确：${right   正确的}<br>❌ 错误：${wrong   错误的}<br>🎯 正确率：${rate}%`;
+  document.getElementById('score').style.display = 'block';.style   风格 . getelementbyid(“分数”)。Display   。显示 = 'block'   “块”；
 }
 
 function reset() {   函数reset() {
-  document.querySelectorAll('input[data-i]').forEach(inp => {document   文档.querySelectorAll(“输入[我]”)。forEach(inp => {
+  document.querySelectorAll('input[data-i]').forEach(inp => {document   文档.querySelectorAll(“输入[我]”)。forEach(inp   可使 => {
     inp.value = ''; inp.style.background = '';
-    sv(current, inp.dataset.i, '');
+    sv(current, inp.dataset.i, '');sv(目前,inp   可使.dataset。我,”);
   });
-  document.querySelectorAll('.ans').forEach(e => e.style.display = 'none');
-  document.getElementById('score').style.display = 'none';
+  document.querySelectorAll('.ans').forEach(e => e.style.display = 'none');document   文档.querySelectorAll(', ')。forEach(e => e.style   风格.display   显示 = 'none')；
+  document.getElementById('score').style.display = 'none';.style   风格 . getelementbyid(“分数”)。Display   。显示 = 'none'；
 }
 
-function ht(aid, i) {
-  alert('提示：' + articles.find(a => a.id === aid).ans[i]);
+function ht(aid, i) {   函数ht(aid, i   我) {
+  alert('提示：' + articles.find(a => a.id === aid).ans[i]);alert('提示：'   articles   文章.find   找到(a      一个一个 => a   一个.id === aid).ans      岁岁[i   我]);
 }
 </script>   < / script>
 </body>   身体< / >
