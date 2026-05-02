@@ -73,7 +73,6 @@ body{
   .catalog,.page{padding:12px 6px}
 }
 
-/* 容器紧贴文字，消除多余间距 */
 .input-group{
   display:inline-flex;
   align-items:baseline;
@@ -81,23 +80,22 @@ body{
   margin:0 2px;
 }
 
-/* 核心改造：输入框无痕融入原文 */
+/* 基础输入框样式 */
 input{
   border:none;
   border-bottom:1px solid #ccc;
   background:transparent;
-  width:auto;
-  min-width:4em;
   padding:1px 2px;
   margin:0;
   outline:none;
-  font-size:inherit;
   text-align:center;
+  /* 文字不换行，可超长输入 */
+  white-space:nowrap;
+  overflow:visible;
 }
-@media (max-width:480px){
-  input{
-    min-width:3.5em;
-  }
+/* 超过4字符：字体小一号 */
+input.long-ans{
+  font-size:0.9em;
 }
 
 .ans{
@@ -212,6 +210,9 @@ let save = JSON.parse(localStorage.getItem('save')) || {};
 let study = JSON.parse(localStorage.getItem('study')) || {};
 let year = new Date().getFullYear();
 
+// 固定4字符宽度基准
+const BASE_WIDTH_EM = 4;
+
 setInterval(() => {
   const today = new Date().toISOString().split('T')[0];
   study[today] = (study[today] || 0) + 1;
@@ -274,10 +275,15 @@ function open(id) {
 function render(art) {
   const box = document.getElementById('content');
   let html = art.text.replace(/\{\{c(\d+)::.*?\}\}/g, (m, n) => {
-    const i = n - 1;
+    const i = Number(n) - 1;
+    const answer = art.ans[i] || '';
+    const len = answer.length;
+    let wEm = len <= 4 ? len : BASE_WIDTH_EM;
+    let longClass = len > 4 ? 'long-ans' : '';
     const v = save[art.id]?.[i] || '';
     return `<div class="input-group">
-      <input type="text" data-i="${i}" value="${v}" oninput="sv(${art.id},${i},this.value)">
+      <input type="text" class="${longClass}" style="width:${wEm}em;" 
+             data-i="${i}" value="${v}" oninput="sv(${art.id},${i},this.value)">
       <button class="hint" onclick="ht(${art.id},${i}, this)">💡</button>
       <div class="ans" id="a${art.id}_${i}"></div>
     </div>`;
