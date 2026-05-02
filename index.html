@@ -81,7 +81,6 @@ body{
   margin:0 2px;
 }
 
-/* 输入框：只保留直的深蓝色下划线，完全无框 */
 input{
   border:none;
   border-bottom:1.5px solid #003377;
@@ -141,11 +140,11 @@ input.wrong{
   opacity:0;
 }
 
-/* 悬浮提示按钮：位置上移，不被键盘挡住 */
+/* 提示按钮移到页面右上角固定位置 */
 .floating-hint{
   position:fixed;
-  bottom:170px;
-  right:20px;
+  top:10px;
+  right:10px;
   background:#ff9900ee;
   color:#fff;
   width:44px;
@@ -160,13 +159,7 @@ input.wrong{
   cursor:pointer;
   z-index:999;
 }
-@media (max-width:480px){
-  .floating-hint{
-    bottom:190px;
-  }
-}
 
-/* 按钮顺序修正：Clear在最下面，Check在上面 */
 .check, .reset-fixed{
   position:fixed;
   right:20px;
@@ -233,22 +226,12 @@ let study = JSON.parse(localStorage.getItem('study')) || {};
 let year = new Date().getFullYear();
 let currentFocusInput = null;
 
-// 记录当前输入框，即使点击提示也保留
 document.addEventListener('focusin', e => {
   if(e.target.tagName === 'INPUT' && e.target.dataset.i){
     currentFocusInput = e.target;
   }
 });
 
-// 快捷键：Option + T 触发提示
-document.addEventListener('keydown', e => {
-  if(e.key === 't' && (e.altKey || e.metaKey)){
-    e.preventDefault();
-    showCurrentHint();
-  }
-});
-
-// 点击提示按钮时，阻止失去焦点
 document.getElementById('floatHint').addEventListener('mousedown', e => {
   e.preventDefault();
 });
@@ -296,7 +279,6 @@ function showCurrentHint(){
   g.appendChild(t);
   setTimeout(()=>t.classList.add('fade'),4000);
   setTimeout(()=>t.remove(),5000);
-  // 点击提示后重新聚焦，保持键盘不消失
   currentFocusInput.focus();
 }
 
@@ -375,7 +357,7 @@ function reset() {
     inp.classList.remove('correct','wrong');
     sv(current, inp.dataset.i, '');
   });
-  document.querySelectorAll('.ans').forEach(e=>e.style.display='none');
+  document.querySelectorAll('.ans').forEach(e=>e.style.display = 'none');
   document.getElementById('score').style.display = 'none';
 }
 
@@ -391,40 +373,47 @@ function getMotivationText(totalMin) {
 }
 
 function getHeatLevel(min) {
-  if(min<2)return 0;
-  if(min<=15)return1;
-  if(min<=30)return2;
-  if(min<=60)return3;
-  return4;
+  if(min < 2) return 0;
+  if(min <= 15) return 1;
+  if(min <= 30) return 2;
+  if(min <= 60) return 3;
+  return 4;
 }
 
 function initHeat() {
   document.getElementById('yShow').innerText = year;
   const grid = document.getElementById('heatGrid');
   grid.innerHTML = '';
-  const start = new Date(year,0,1);
-  let totalMin=0;
-  for(let k in study) if(study[k]>=2) totalMin+=study[k];
-  document.getElementById('motivation').innerText = `累计学习：${totalMin} 分钟 | ${getMotivationText(totalMin)}`;
+  const start = new Date(year, 0, 1);
 
-  for(let w=0;w<52;w++){
-    for(let d=0;d<7;d++){
+  let totalMin = 0;
+  for (let k in study) {
+    if(study[k] >= 2) totalMin += study[k];
+  }
+
+  const msg = getMotivationText(totalMin);
+  document.getElementById('motivation').innerText =
+    `累计学习：${totalMin} 分钟 | ${msg}`;
+
+  for (let w = 0; w < 52; w++) {
+    for (let d = 0; d < 7; d++) {
       const date = new Date(start);
-      date.setDate(start.getDate()+w*7+d);
-      if(date.getFullYear()!==year)continue;
+      date.setDate(start.getDate() + w * 7 + d);
+      if (date.getFullYear() !== year) continue;
       const key = date.toISOString().split('T')[0];
       const cell = document.createElement('div');
       cell.className = 'heat-cell';
-      const lv = getHeatLevel(study[key]||0);
-      if(lv===1)cell.classList.add('l1');
-      if(lv===2)cell.classList.add('l2');
-      if(lv===3)cell.classList.add('l3');
-      if(lv===4)cell.classList.add('l4');
+      const level = getHeatLevel(study[key] || 0);
+      if(level === 1) cell.classList.add('l1');
+      if(level === 2) cell.classList.add('l2');
+      if(level === 3) cell.classList.add('l3');
+      if(level === 4) cell.classList.add('l4');
       grid.appendChild(cell);
     }
   }
   const today = new Date().toISOString().split('T')[0];
-  document.getElementById('today').innerText = `${today} | 今日学习：${study[today]||0} 分钟`;
+  let todayMin = study[today] || 0;
+  document.getElementById('today').innerText = `${today} | 今日学习：${todayMin} 分钟`;
 }
 </script>
 </body>
