@@ -113,12 +113,14 @@ input.wrong{
   left:50%;
   transform:translateX(-50%);
   color:#7f5fff;
-  background:#f3f0ff;
+  background:rgba(243,240,255,0.6);
   padding:0 6px;
   border-radius:3px;
   display:none;
   white-space:nowrap;
   font-size:12px;
+  border:1px dashed rgba(127,95,255,0.3);
+  text-align:center;
 }
 
 .toast{
@@ -135,12 +137,13 @@ input.wrong{
   opacity:1;
   transition:opacity 1s;
   z-index:10;
+  text-align:center;
 }
 .toast.fade{
   opacity:0;
 }
 
-/* 提示按钮移到页面右上角固定位置 */
+/* 提示按钮：固定在右上角，无视键盘，永久固定 */
 .floating-hint{
   position:fixed;
   top:10px;
@@ -157,7 +160,7 @@ input.wrong{
   border:none;
   box-shadow:0 4px 12px rgba(0,0,0,0.2);
   cursor:pointer;
-  z-index:999;
+  z-index:999999;
 }
 
 .check, .reset-fixed{
@@ -312,7 +315,7 @@ function render(art) {
     const v = save[art.id]?.[i] || '';
     return `<div class="input-group">
       <input type="text" style="width:${w}em" data-i="${i}" value="${v}" oninput="sv(${art.id},${i},this.value)">
-      <div class="ans" id="a${art.id}_${i}"></div>
+      <div class="ans" id="a${current}_${i}"></div>
     </div>`;
   });
   box.innerHTML = html;
@@ -331,6 +334,7 @@ function back() {
   initHeat();
 }
 
+// ========== 核心修改：正确不显示答案，错误/空才显示 ==========
 function check() {
   const art = articles.find(a => a.id === current);
   const inputs = document.querySelectorAll('input[data-i]');
@@ -342,8 +346,11 @@ function check() {
     total++; ok?right++:wrong++;
     inp.classList.remove('correct','wrong');
     inp.classList.add(ok?'correct':'wrong');
-    document.getElementById(`a${current}_${i}`).innerText = art.ans[i];
-    document.getElementById(`a${current}_${i}`).style.display = 'block';
+    
+    const ansEl = document.getElementById(`a${current}_${i}`);
+    ansEl.innerText = art.ans[i];
+    // 正确：不显示答案；错误/空：显示答案
+    ansEl.style.display = ok ? 'none' : 'block';
   });
   const rate = total?Math.round(right/total*100):0;
   document.getElementById('score').innerHTML = `📝 总题数：${total}<br>✅ 正确：${right}<br>❌ 错误：${wrong}<br>🎯 正确率：${rate}%`;
