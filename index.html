@@ -6,16 +6,14 @@
 <title>日语完形填空</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-/* 缩小整体左右边距，尽可能一行多放字 */
 body{
   font-family:sans-serif;
   max-width:800px;
   margin:0 auto;
   padding:10px 6px;
   background:#f5f5fa;
-  padding-bottom:100px;
+  padding-bottom:120px;
 }
-/* 热力图顶部容器，放左右新按钮+原有中间按钮 */
 .heat-top-wrap{
   display:flex;
   align-items:center;
@@ -27,7 +25,6 @@ body{
   gap:8px;
   justify-content:center;
 }
-/* 统一图标按钮样式，保持协调 */
 .heat-btn{
   width:32px;
   height:32px;
@@ -60,15 +57,12 @@ body{
 .item{padding:12px 8px;background:#f0f7ff;border-radius:10px;margin-bottom:10px;cursor:pointer}
 .page{display:none;background:#fff;border-radius:12px;padding:15px 8px}
 .back{background:#999;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;margin-bottom:20px}
-/* 段落样式：首行缩进1个日文字符，段间空行 */
 .text{
   font-size:17px;
   line-height:1.8;
   margin:15px 0;
-}
-.text p{
-  text-indent:1em; /* 首行缩进1个字符 */
-  margin-bottom:1em; /* 段间空行 */
+  /* 整篇一段，首行缩进1个日语字符 */
+  text-indent:1em;
 }
 
 @media (max-width:480px){
@@ -131,7 +125,6 @@ input{
   opacity:0;
 }
 
-/* 提示按钮恢复原来大小，好按 */
 .hint{
   background:#ff9000;
   color:#fff;
@@ -142,10 +135,11 @@ input{
   cursor:pointer;
 }
 
-/* 悬浮按钮：检查答案在上，清空答案在正下方 位置正确 */
+/* ========== 按钮位置 最终正确版 ========== */
+/* 检查答案 → 在上面 */
 .check{
   position:fixed;
-  bottom:30px;
+  bottom:80px;
   right:20px;
   background:#2385bb;
   color:#fff;
@@ -155,9 +149,10 @@ input{
   cursor:pointer;
   box-shadow:0 4px 12px rgba(0,0,0,0.2);
 }
+/* 清空答案 → 在最下面（靠近屏幕边缘） */
 .reset-fixed{
   position:fixed;
-  bottom:85px;
+  bottom:30px;
   right:20px;
   background:#999;
   color:#fff;
@@ -167,13 +162,13 @@ input{
   cursor:pointer;
   box-shadow:0 4px 12px rgba(0,0,0,0.2);
 }
+
 .score{background:#f6f9ff;padding:15px 10px;border-radius:10px;margin:15px 0}
 </style>
 </head>
 <body>
 
 <div class="heat">
-<!-- 热力图顶部：左刷新、中年份、右清空今日记录 -->
 <div class="heat-top-wrap">
   <button class="heat-btn" id="refreshBtn">⟳</button>
   <div class="heat-bar">
@@ -210,7 +205,6 @@ let save = JSON.parse(localStorage.getItem('save')) || {};
 let study = JSON.parse(localStorage.getItem('study')) || {};
 let year = new Date().getFullYear();
 
-// 每分钟自动计时
 setInterval(() => {
   const today = new Date().toISOString().split('T')[0];
   study[today] = (study[today] || 0) + 1;
@@ -232,13 +226,10 @@ window.onload = () => {
       initHeat();
     });
 
-  // 左：刷新更新时间按钮
   document.getElementById('refreshBtn').onclick = function(){
     initHeat();
-    alert("时间已刷新");
   };
 
-  // 右：清除今日记录按钮
   document.getElementById('clearTodayBtn').onclick = function(){
     const today = new Date().toISOString().split('T')[0];
     if(confirm("确定要清除今日学习时间记录吗？")){
@@ -260,18 +251,9 @@ function initList() {
   });
 }
 
-// 处理文本：// 分段、加空行、首行缩进
+// 取消按//自动分段，直接原样返回文本，只保留整体首行缩进
 function formatArticleText(rawText){
-  // 用 // 切分段落
-  const paras = rawText.split('//');
-  let html = '';
-  paras.forEach(p=>{
-    let pText = p.trim();
-    if(!pText) return;
-    // 保留挖空标签，包裹p标签实现缩进和段间距
-    html += `<p>${pText}</p>`;
-  });
-  return html;
+  return rawText;
 }
 
 function open(id) {
@@ -294,8 +276,8 @@ function render(art) {
       <div class="ans" id="a${art.id}_${i}"></div>
     </div>`;
   });
-  // 分段+缩进+空行处理
-  box.innerHTML = formatArticleText(html);
+  // 直接原样渲染，不分段
+  box.innerHTML = html;
 }
 
 function sv(aid, i, v) {
@@ -340,7 +322,6 @@ function reset() {
   document.getElementById('score').style.display = 'none';
 }
 
-// 提示停留5秒
 function ht(aid, i, btn) {
   const txt = articles.find(x => x.id === aid).ans[i];
   const group = btn.closest('.input-group');
@@ -354,9 +335,7 @@ function ht(aid, i, btn) {
 
 document.getElementById('yPrev').onclick = () => { year--; initHeat(); };
 document.getElementById('yNext').onclick = () => { year++; initHeat(); };
-document.getElementById('yReset').onclick = () => { year = new Date().getFullYear(); initHeat(); };
 
-// 鼓励语梯度
 function getMotivationText(totalMin) {
   if(totalMin <= 30){
     return "刚开始很棒，坚持住✨";
@@ -371,9 +350,8 @@ function getMotivationText(totalMin) {
   }
 }
 
-// 热力图等级
 function getHeatLevel(min) {
-  if(min < 2) return 0; // 不足2分钟不计入
+  if(min < 2) return 0;
   if(min <= 15) return 1;
   if(min <= 30) return 2;
   if(min <= 60) return 3;
@@ -388,7 +366,6 @@ function initHeat() {
 
   let totalMin = 0;
   for (let k in study) {
-    // 累计也只统计≥2分钟的
     if(study[k] >= 2) totalMin += study[k];
   }
 
