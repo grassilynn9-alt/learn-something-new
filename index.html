@@ -107,25 +107,25 @@ input.wrong{
   border-bottom-color:#ff9999;
 }
 
-/* 正确答案框：调整透明度+好看的颜色+上移位置+强制居中 */
+/* 正确答案框：极小padding + 柔和协调颜色 */
 .ans{
   position:absolute;
-  bottom:-18px; /* 上移，不遮挡文字 */
-  left:0;       /* 取消偏移，宽度自适应 */
-  width:100%;   /* 宽度和输入框一致 */
-  color:#2d5aff;/* 好看的深蓝色 */
-  background:rgba(220,230,255,0.85);/* 降低透明度，更清晰 */
-  padding:1px 4px;
-  border-radius:4px;
+  bottom:-18px;
+  left:0;
+  width:100%;
+  color:#3b6dff;
+  background:rgba(230,235,255,0.75);
+  padding:0 3px;
+  border-radius:3px;
   display:none;
   white-space:nowrap;
   font-size:12px;
-  border:1px solid rgba(76,123,255,0.4);/* 细边框 */
-  text-align:center;/* 强制居中 */
+  border:1px solid rgba(100,140,255,0.3);
+  text-align:center;
   box-sizing:border-box;
 }
 
-/* 提示框：强制居中+宽度自适应 */
+/* 提示框文字居中 */
 .toast{
   position:absolute;
   top:-28px;
@@ -140,27 +140,24 @@ input.wrong{
   opacity:1;
   transition:opacity 1s;
   z-index:10;
-  text-align:center;/* 强制居中 */
+  text-align:center;
   box-sizing:border-box;
 }
 .toast.fade{
   opacity:0;
 }
 
-/* 移除悬浮提示按钮，改为输入框右侧小图标 */
+/* 提示按钮：仅橙色圆形 + 不遮挡文字 + 柔和颜色 */
 .hint-icon{
   display:inline-block;
-  width:18px;
-  height:18px;
+  width:14px;
+  height:14px;
   border-radius:50%;
-  background:#ff9900;
-  color:#fff;
-  font-size:10px;
-  text-align:center;
-  line-height:18px;
+  background:#ffb366;
+  margin-left:4px;
   cursor:pointer;
-  margin-left:2px;
   user-select:none;
+  flex-shrink:0;
 }
 
 .check, .reset-fixed{
@@ -217,7 +214,6 @@ input.wrong{
 <div class="score" id="score" style="display:none"></div>
 </div>
 
-<!-- 移除悬浮提示按钮 -->
 <button class="check" onclick="check()">Check</button>
 <button class="reset-fixed" onclick="reset()">Clear</button>
 
@@ -267,7 +263,7 @@ window.onload = () => {
   };
 };
 
-// 提示功能：绑定到输入框右侧小图标
+// 提示功能
 function showHint(aid, i, el) {
   const art = articles.find(x=>x.id===aid);
   if(!art) return;
@@ -279,7 +275,6 @@ function showHint(aid, i, el) {
   g.appendChild(t);
   setTimeout(()=>t.classList.add('fade'),4000);
   setTimeout(()=>t.remove(),5000);
-  // 保持输入框聚焦
   const input = g.querySelector('input');
   if(input) input.focus();
 }
@@ -312,10 +307,9 @@ function render(art) {
     const len = ans.length;
     let w = len <=4 ? len+1 : 5;
     const v = save[art.id]?.[i] || '';
-    // 输入框右侧加提示小图标，替代悬浮按钮
     return `<div class="input-group">
       <input type="text" style="width:${w}em" data-i="${i}" value="${v}" oninput="sv(${art.id},${i},this.value)">
-      <span class="hint-icon" onclick="showHint(${art.id},${i},this)">💡</span>
+      <span class="hint-icon" onclick="showHint(${art.id},${i},this)"></span>
       <div class="ans" id="a${current}_${i}"></div>
     </div>`;
   });
