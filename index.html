@@ -12,7 +12,7 @@ body{
   margin:0 auto;
   padding:10px 6px;
   background:#f5f5fa;
-  padding-bottom:120px;
+  padding-bottom:140px;
 }
 .heat-top-wrap{
   display:flex;
@@ -68,6 +68,7 @@ body{
   body{
     padding:8px 4px;
     font-size:15px;
+    padding-bottom:160px;
   }
   .text{font-size:15px;line-height:1.7}
   .catalog,.page{padding:12px 6px}
@@ -80,7 +81,7 @@ body{
   margin:0 2px;
 }
 
-/* 输入框基础样式：深蓝色下划线，统一宽度 */
+/* 输入框：只保留直的深蓝色下划线，完全无框 */
 input{
   border:none;
   border-bottom:1.5px solid #003377;
@@ -92,16 +93,16 @@ input{
   font-size:inherit;
   white-space:nowrap;
   overflow:visible;
+  border-radius:0;
+  box-shadow:none;
+  -webkit-appearance:none;
   transition: all 0.2s;
 }
 
-/* 正确：深绿色文字 + 浅绿色下划线 */
 input.correct{
   color:#006633;
   border-bottom-color:#66bb99;
 }
-
-/* 错误：深红色文字 + 浅红色下划线 */
 input.wrong{
   color:#990000;
   border-bottom-color:#ff9999;
@@ -140,10 +141,10 @@ input.wrong{
   opacity:0;
 }
 
-/* 悬浮提示按钮 */
+/* 悬浮提示按钮：位置上移，不被键盘挡住 */
 .floating-hint{
   position:fixed;
-  bottom:130px;
+  bottom:170px;
   right:20px;
   background:#ff9900ee;
   color:#fff;
@@ -159,8 +160,13 @@ input.wrong{
   cursor:pointer;
   z-index:999;
 }
+@media (max-width:480px){
+  .floating-hint{
+    bottom:190px;
+  }
+}
 
-/* 手机底部按钮：半透明 + 短文字 */
+/* 按钮顺序修正：Clear在最下面，Check在上面 */
 .check, .reset-fixed{
   position:fixed;
   right:20px;
@@ -172,14 +178,14 @@ input.wrong{
   font-size:14px;
   z-index:999;
 }
-.check{
+.reset-fixed{
   bottom:30px;
-  background:#2385bbee;
+  background:#666666bb;
   color:#fff;
 }
-.reset-fixed{
-  bottom:80px;
-  background:#666666bb;
+.check{
+  bottom:90px;
+  background:#2385bbee;
   color:#fff;
 }
 
@@ -215,7 +221,6 @@ input.wrong{
 <div class="score" id="score" style="display:none"></div>
 </div>
 
-<!-- 悬浮按钮 -->
 <button class="floating-hint" id="floatHint" onclick="showCurrentHint()">💡</button>
 <button class="check" onclick="check()">Check</button>
 <button class="reset-fixed" onclick="reset()">Clear</button>
@@ -228,14 +233,24 @@ let study = JSON.parse(localStorage.getItem('study')) || {};
 let year = new Date().getFullYear();
 let currentFocusInput = null;
 
-// 记录当前光标所在输入框
+// 记录当前输入框，即使点击提示也保留
 document.addEventListener('focusin', e => {
   if(e.target.tagName === 'INPUT' && e.target.dataset.i){
     currentFocusInput = e.target;
   }
 });
-document.addEventListener('focusout', () => {
-  setTimeout(() => { currentFocusInput = null }, 200);
+
+// 快捷键：Option + T 触发提示
+document.addEventListener('keydown', e => {
+  if(e.key === 't' && (e.altKey || e.metaKey)){
+    e.preventDefault();
+    showCurrentHint();
+  }
+});
+
+// 点击提示按钮时，阻止失去焦点
+document.getElementById('floatHint').addEventListener('mousedown', e => {
+  e.preventDefault();
 });
 
 setInterval(() => {
@@ -270,7 +285,6 @@ window.onload = () => {
   };
 };
 
-// 悬浮提示：只对当前光标输入框生效
 function showCurrentHint(){
   if(!currentFocusInput || !current) return;
   const i = currentFocusInput.dataset.i;
@@ -282,6 +296,8 @@ function showCurrentHint(){
   g.appendChild(t);
   setTimeout(()=>t.classList.add('fade'),4000);
   setTimeout(()=>t.remove(),5000);
+  // 点击提示后重新聚焦，保持键盘不消失
+  currentFocusInput.focus();
 }
 
 function initList() {
@@ -294,8 +310,6 @@ function initList() {
     list.appendChild(div);
   });
 }
-
-function formatArticleText(rawText){ return rawText; }
 
 function open(id) {
   current = id;
