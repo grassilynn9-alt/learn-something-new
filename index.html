@@ -6,10 +6,37 @@
 <title>日语完形填空</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:sans-serif;max-width:800px;margin:0 auto;padding:20px;background:#f5f5fa;padding-bottom:100px}
-.heat{background:#fff;border-radius:12px;padding:20px;margin-bottom:20px}
-.heat-bar{display:flex;gap:8px;justify-content:center;margin-bottom:10px}
-.heat-btn{width:32px;height:32px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer}
+/* 缩小整体左右边距，尽可能一行多放字 */
+body{
+  font-family:sans-serif;
+  max-width:800px;
+  margin:0 auto;
+  padding:10px 6px;
+  background:#f5f5fa;
+  padding-bottom:100px;
+}
+/* 热力图顶部容器，放左右新按钮+原有中间按钮 */
+.heat-top-wrap{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:10px;
+}
+.heat-bar{
+  display:flex;
+  gap:8px;
+  justify-content:center;
+}
+/* 统一图标按钮样式，保持协调 */
+.heat-btn{
+  width:32px;
+  height:32px;
+  border:1px solid #ddd;
+  border-radius:6px;
+  background:#fff;
+  cursor:pointer;
+  font-size:16px;
+}
 .heat-date{text-align:center;color:#666;margin-bottom:10px}
 
 .heat-grid{
@@ -28,29 +55,39 @@ body{font-family:sans-serif;max-width:800px;margin:0 auto;padding:20px;backgroun
 .heat-cell.l4{background:#196127}
 
 .heat-info{text-align:center;padding:10px;background:#f9f9fb;border-radius:8px;margin-top:10px}
-.catalog{background:#fff;border-radius:12px;padding:24px}
-.catalog h2{text-align:center;color:#2385bb;margin-bottom:20px}
-.item{padding:14px;background:#f0f7ff;border-radius:10px;margin-bottom:10px;cursor:pointer}
-.page{display:none;background:#fff;border-radius:12px;padding:24px}
+.catalog{background:#fff;border-radius:12px;padding:15px 10px;margin-bottom:20px}
+.catalog h2{text-align:center;color:#2385bb;margin-bottom:15px}
+.item{padding:12px 8px;background:#f0f7ff;border-radius:10px;margin-bottom:10px;cursor:pointer}
+.page{display:none;background:#fff;border-radius:12px;padding:15px 8px}
 .back{background:#999;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;margin-bottom:20px}
-.text{font-size:17px;line-height:1.8;margin:20px 0}
+/* 段落样式：首行缩进1个日文字符，段间空行 */
+.text{
+  font-size:17px;
+  line-height:1.8;
+  margin:15px 0;
+}
+.text p{
+  text-indent:1em; /* 首行缩进1个字符 */
+  margin-bottom:1em; /* 段间空行 */
+}
 
 @media (max-width:480px){
   body{
-    padding:12px;
+    padding:8px 4px;
     font-size:15px;
   }
   .text{font-size:15px;line-height:1.7}
+  .catalog,.page{padding:12px 6px}
 }
 
 .input-group{
   display:inline-block;
   position:relative;
-  margin:0 2px;
+  margin:0 1px;
   vertical-align:middle;
 }
 input{
-  width:70px;
+  width:65px;
   padding:3px 4px;
   border:1px solid #ddd;
   border-radius:3px;
@@ -58,7 +95,7 @@ input{
 }
 @media (max-width:480px){
   input{
-    width:60px;
+    width:58px;
     font-size:13px;
   }
 }
@@ -94,23 +131,25 @@ input{
   opacity:0;
 }
 
+/* 提示按钮恢复原来大小，好按 */
 .hint{
   background:#ff9000;
   color:#fff;
   border:none;
-  padding:1px 4px;
+  padding:2px 6px;
   border-radius:3px;
-  font-size:10px;
+  font-size:12px;
   cursor:pointer;
 }
 
+/* 悬浮按钮：检查答案在上，清空答案在正下方 位置正确 */
 .check{
   position:fixed;
   bottom:30px;
-  right:30px;
+  right:20px;
   background:#2385bb;
   color:#fff;
-  padding:16px 24px;
+  padding:14px 20px;
   border-radius:50px;
   border:none;
   cursor:pointer;
@@ -118,27 +157,31 @@ input{
 }
 .reset-fixed{
   position:fixed;
-  bottom:90px;
-  right:30px;
+  bottom:85px;
+  right:20px;
   background:#999;
   color:#fff;
-  padding:12px 20px;
+  padding:14px 20px;
   border-radius:50px;
   border:none;
   cursor:pointer;
   box-shadow:0 4px 12px rgba(0,0,0,0.2);
 }
-.score{background:#f6f9ff;padding:16px;border-radius:10px;margin:20px 0}
+.score{background:#f6f9ff;padding:15px 10px;border-radius:10px;margin:15px 0}
 </style>
 </head>
 <body>
 
 <div class="heat">
-<div class="heat-bar">
-<button class="heat-btn" id="yPrev">←</button>
-<button class="heat-btn" id="yReset">⟳</button>
-<button class="heat-btn" id="yNext">→</button>
-<span id="yShow">2026</span>
+<!-- 热力图顶部：左刷新、中年份、右清空今日记录 -->
+<div class="heat-top-wrap">
+  <button class="heat-btn" id="refreshBtn">⟳</button>
+  <div class="heat-bar">
+    <button class="heat-btn" id="yPrev">←</button>
+    <span id="yShow">2026</span>
+    <button class="heat-btn" id="yNext">→</button>
+  </div>
+  <button class="heat-btn" id="clearTodayBtn">🗑</button>
 </div>
 <div class="heat-date" id="today"></div>
 <div class="heat-grid" id="heatGrid"></div>
@@ -167,7 +210,7 @@ let save = JSON.parse(localStorage.getItem('save')) || {};
 let study = JSON.parse(localStorage.getItem('study')) || {};
 let year = new Date().getFullYear();
 
-// 自动计时：每分钟自动加1分钟时长，不用点返回
+// 每分钟自动计时
 setInterval(() => {
   const today = new Date().toISOString().split('T')[0];
   study[today] = (study[today] || 0) + 1;
@@ -188,6 +231,22 @@ window.onload = () => {
       initList();
       initHeat();
     });
+
+  // 左：刷新更新时间按钮
+  document.getElementById('refreshBtn').onclick = function(){
+    initHeat();
+    alert("时间已刷新");
+  };
+
+  // 右：清除今日记录按钮
+  document.getElementById('clearTodayBtn').onclick = function(){
+    const today = new Date().toISOString().split('T')[0];
+    if(confirm("确定要清除今日学习时间记录吗？")){
+      delete study[today];
+      localStorage.setItem('study', JSON.stringify(study));
+      initHeat();
+    }
+  };
 };
 
 function initList() {
@@ -199,6 +258,20 @@ function initList() {
     div.onclick = () => open(art.id);
     list.appendChild(div);
   });
+}
+
+// 处理文本：// 分段、加空行、首行缩进
+function formatArticleText(rawText){
+  // 用 // 切分段落
+  const paras = rawText.split('//');
+  let html = '';
+  paras.forEach(p=>{
+    let pText = p.trim();
+    if(!pText) return;
+    // 保留挖空标签，包裹p标签实现缩进和段间距
+    html += `<p>${pText}</p>`;
+  });
+  return html;
 }
 
 function open(id) {
@@ -221,7 +294,8 @@ function render(art) {
       <div class="ans" id="a${art.id}_${i}"></div>
     </div>`;
   });
-  box.innerHTML = html;
+  // 分段+缩进+空行处理
+  box.innerHTML = formatArticleText(html);
 }
 
 function sv(aid, i, v) {
@@ -266,7 +340,7 @@ function reset() {
   document.getElementById('score').style.display = 'none';
 }
 
-// 提示总共停留5秒：4秒后开始渐变，1秒渐隐
+// 提示停留5秒
 function ht(aid, i, btn) {
   const txt = articles.find(x => x.id === aid).ans[i];
   const group = btn.closest('.input-group');
@@ -282,7 +356,7 @@ document.getElementById('yPrev').onclick = () => { year--; initHeat(); };
 document.getElementById('yNext').onclick = () => { year++; initHeat(); };
 document.getElementById('yReset').onclick = () => { year = new Date().getFullYear(); initHeat(); };
 
-// 获取对应分钟数的鼓励语
+// 鼓励语梯度
 function getMotivationText(totalMin) {
   if(totalMin <= 30){
     return "刚开始很棒，坚持住✨";
@@ -297,9 +371,9 @@ function getMotivationText(totalMin) {
   }
 }
 
-// 根据当日学习分钟获取热力图等级
+// 热力图等级
 function getHeatLevel(min) {
-  if(min <= 0) return 0;
+  if(min < 2) return 0; // 不足2分钟不计入
   if(min <= 15) return 1;
   if(min <= 30) return 2;
   if(min <= 60) return 3;
@@ -312,16 +386,16 @@ function initHeat() {
   grid.innerHTML = '';
   const start = new Date(year, 0, 1);
 
-  // 累计总分钟
   let totalMin = 0;
-  for (let k in study) totalMin += study[k];
+  for (let k in study) {
+    // 累计也只统计≥2分钟的
+    if(study[k] >= 2) totalMin += study[k];
+  }
 
-  // 鼓励语
   const msg = getMotivationText(totalMin);
   document.getElementById('motivation').innerText =
     `累计学习：${totalMin} 分钟 | ${msg}`;
 
-  // 全年热力图，按当日分钟深浅着色
   for (let w = 0; w < 52; w++) {
     for (let d = 0; d < 7; d++) {
       const date = new Date(start);
@@ -339,7 +413,8 @@ function initHeat() {
     }
   }
   const today = new Date().toISOString().split('T')[0];
-  document.getElementById('today').innerText = `${today} | 今日学习：${study[today] || 0} 分钟`;
+  let todayMin = study[today] || 0;
+  document.getElementById('today').innerText = `${today} | 今日学习：${todayMin} 分钟`;
 }
 </script>
 </body>
