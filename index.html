@@ -27,8 +27,8 @@ body{font-family:sans-serif;max-width:800px;margin:0 auto;padding:20px;backgroun
 .input-group{display:inline-block;position:relative;margin:0 4px}
 input{width:100px;padding:4px 6px;border:1px solid #999;border-radius:4px}
 .ans{position:absolute;bottom:-22px;right:0;color:#7f5fff;background:#f3f0ff;padding:0 6px;border-radius:3px;display:none;white-space:nowrap}
-.hint{background:#ff9500;color:#fff;border:none;padding:2px 6px;border-radius:3px;font-size:12px;cursor:pointer}
-.check{position:fixed;bottom:30px;right:30px;background:#2385bb;color:#fff;padding:16px 24px;border-radius:50px;border:none;cursor:pointer;box-shadow:0 4px 12px #0003}
+.hint{background:#ff9000;color:#fff;border:none;padding:2px 6px;border-radius:3px;font-size:12px;cursor:pointer}
+.check{position:fixed;bottom:30px;right:30px;background:#2385bb;color:#fff;padding:16px 24px;border-radius:50px;border:none;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.2)}
 .reset{background:#999;color:#fff;border:none;padding:10px 20px;border-radius:6px;cursor:pointer}
 .score{background:#f6f9ff;padding:16px;border-radius:10px;margin:20px 0}
 </style>
@@ -63,9 +63,7 @@ input{width:100px;padding:4px 6px;border:1px solid #999;border-radius:4px}
 <button class="check" onclick="check()">检查答案</button>
 
 <script>
-// 🔥 这里只改：从 articles.tsv 加载数据，其他全部不动
 let articles = [];
-
 let current = null;
 let save = JSON.parse(localStorage.getItem('save')) || {};
 let study = JSON.parse(localStorage.getItem('study')) || {};
@@ -75,20 +73,15 @@ window.onload = () => {
   fetch("articles.tsv")
     .then(res => res.text())
     .then(text => {
-      articles = [];
-      const lines = text.trim().split("\n");
-      for (let i = 1; i < lines.length; i++) {
-        const parts = lines[i].split("\t");
-        const id = parseInt(parts[0]);
-        const title = parts[1];
-        const text = parts[2];
-        const ans = JSON.parse(parts[3]);
-        articles.push({ id, title, text, ans });
-      }
+      const lines = text.trim().split("\n").slice(1);
+      articles = lines.map(line => {
+        const [id, title, text, ansStr] = line.split("\t");
+        const ans = ansStr.split(",");
+        return { id: parseInt(id), title, text, ans };
+      });
       initList();
       initHeat();
-    })
-    .catch(err => console.log(err));
+    });
 };
 
 function initList() {
@@ -116,8 +109,7 @@ function render(art) {
   let html = art.text.replace(/\{\{c(\d+)::.*?\}\}/g, (m, n) => {
     const i = n - 1;
     const v = save[art.id]?.[i] || '';
-    return `
-    <div class="input-group">
+    return `<div class="input-group">
       <input type="text" data-i="${i}" value="${v}" oninput="sv(${art.id},${i},this.value)">
       <button class="hint" onclick="ht(${art.id},${i})">💡</button>
       <div class="ans" id="a${art.id}_${i}"></div>
@@ -154,19 +146,19 @@ function check() {
     const ok = art.ans[i] === v;
     total++;
     ok ? right++ : wrong++;
-    inp.style.background = ok ? '#edfaf1' : '#fff0f0';
-    const ansBox = document.getElementById(`a${current}_${i}`);
-    ansBox.innerText = art.ans[i];
-    ansBox.style.display = 'block';
+    inp.style.background = ok ? '#e6f7ee' : '#ffeaea';
+    document.getElementById(`a${current}_${i}`).innerText = art.ans[i];
+    document.getElementById(`a${current}_${i}`).style.display = 'block';
   });
-  const rate = total ? Math.round(right / total * 100) : 0;
-  document.getElementById('score').innerHTML = `📝 题数：${total}<br>✅ 正确：${right}<br>❌ 错误：${wrong}<br>🎯 正确率：${rate}%`;
+  const rate = total ? Math.round(right/total*100) : 0;
+  document.getElementById('score').innerHTML = `📝 总题数：${total}<br>✅ 正确：${right}<br>❌ 错误：${wrong}<br>🎯 正确率：${rate}%`;
   document.getElementById('score').style.display = 'block';
 }
 
 function reset() {
-  document.querySelectorAll('input[data-i]').forEach(inp => {
-    inp.value = ''; inp.style.background = '';
+  document.querySelectorAll('input').forEach(inp => {
+    inp.value = '';
+    inp.style.background = '';
     sv(current, inp.dataset.i, '');
   });
   document.querySelectorAll('.ans').forEach(e => e.style.display = 'none');
@@ -174,10 +166,9 @@ function reset() {
 }
 
 function ht(aid, i) {
-  alert('提示：' + articles.find(a => a.id === aid).ans[i]);
+  alert('提示：' + articles.find(x => x.id === aid).ans[i]);
 }
 
-// 热力图 🔥 完全保留，一个字没动！
 document.getElementById('yPrev').onclick = () => { year--; initHeat(); };
 document.getElementById('yNext').onclick = () => { year++; initHeat(); };
 document.getElementById('yReset').onclick = () => { year = new Date().getFullYear(); initHeat(); };
@@ -190,25 +181,23 @@ function initHeat() {
   for (let w = 0; w < 52; w++) {
     for (let d = 0; d < 7; d++) {
       const date = new Date(start);
-      date.setDate(date.getDate() + (w * 7 + d));
+      date.setDate(start.getDate() + w * 7 + d);
       if (date.getFullYear() !== year) continue;
+      const key = date.toISOString().split('T')[0];
       const cell = document.createElement('div');
       cell.className = 'heat-cell';
-      const key = date.toISOString().split('T')[0];
-      const count = study[key] || 0;
-      if (count > 0) {
-        if (count >= 4) cell.classList.add('l4');
-        else if (count >= 3) cell.classList.add('l3');
-        else if (count >= 2) cell.classList.add('l2');
-        else cell.classList.add('l1');
-      }
+      const c = study[key] || 0;
+      if (c >= 4) cell.classList.add('l4');
+      else if (c >= 3) cell.classList.add('l3');
+      else if (c >= 2) cell.classList.add('l2');
+      else if (c >= 1) cell.classList.add('l1');
       grid.appendChild(cell);
     }
   }
   const today = new Date().toISOString().split('T')[0];
-  document.getElementById('today').innerText = `${today} | 今日学习次数：${study[today] || 0}`;
+  document.getElementById('today').innerText = `${today} | 今日学习：${study[today] || 0} 次`;
   const total = Object.values(study).reduce((a,b)=>a+b,0);
-  document.getElementById('motivation').innerText = `总学习次数：${total} | 继续加油！`;
+  document.getElementById('motivation').innerText = `累计学习：${total} 次 | 继续坚持！`;
 }
 </script>
 </body>
