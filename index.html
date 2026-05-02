@@ -2,7 +2,6 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<!-- 固定视口，禁止输入自动放大，解决iPhone输入放大问题 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>日语完形填空</title>
 <style>
@@ -13,57 +12,57 @@ body{font-family:sans-serif;max-width:800px;margin:0 auto;padding:20px;backgroun
 .heat-btn{width:32px;height:32px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer}
 .heat-date{text-align:center;color:#666;margin-bottom:10px}
 
-/* 电脑：年视图（52周）手机：月视图（4-5周） */
 .heat-grid{
   display:grid;
-  grid-template-columns:repeat(52, 10px);
+  grid-template-columns:repeat(52, 1fr);
   grid-template-rows:repeat(7, 10px);
   gap:1px;
   justify-content:center;
   width:100%;
   overflow-x:auto;
 }
-@media (max-width:480px){
-  body{
-    padding:12px;
-    font-size:15px; /* 手机字体略小 */
-  }
-  .heat-grid{
-    grid-template-columns:repeat(5, 10px);
-    width:fit-content;
-    margin:0 auto;
-  }
-}
-
 .heat-cell{width:10px;height:10px;background:#ebedf0}
 .heat-cell.l1{background:#c6e8b8}
-.heat-cell.l2{background:#76c776}
-.heat-cell.l3{background:#2393a3}
-.heat-cell.l4{background:#1922a2}
+.heat-cell.l2{background:#7bc96f}
+.heat-cell.l3{background:#239a3b}
+.heat-cell.l4{background:#196127}
+
 .heat-info{text-align:center;padding:10px;background:#f9f9fb;border-radius:8px;margin-top:10px}
 .catalog{background:#fff;border-radius:12px;padding:24px}
 .catalog h2{text-align:center;color:#2385bb;margin-bottom:20px}
 .item{padding:14px;background:#f0f7ff;border-radius:10px;margin-bottom:10px;cursor:pointer}
 .page{display:none;background:#fff;border-radius:12px;padding:24px}
 .back{background:#999;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;margin-bottom:20px}
-.text{font-size:17px;line-height:1.8;margin:20px:0}
+.text{font-size:17px;line-height:1.8;margin:20px 0}
+
 @media (max-width:480px){
+  body{
+    padding:12px;
+    font-size:15px;
+  }
   .text{font-size:15px;line-height:1.7}
 }
 
 .input-group{
   display:inline-block;
   position:relative;
-  margin:0 4px;
+  margin:0 2px;
   vertical-align:middle;
 }
 input{
-  width:100px;
-  padding:4px 6px;
-  border:1px solid #999;
-  border-radius:4px;
-  font-size:inherit;
+  width:70px;
+  padding:3px 4px;
+  border:1px solid #ddd;
+  border-radius:3px;
+  font-size:14px;
 }
+@media (max-width:480px){
+  input{
+    width:60px;
+    font-size:13px;
+  }
+}
+
 .ans{
   position:absolute;
   bottom:-22px;
@@ -76,7 +75,6 @@ input{
   white-space:nowrap;
 }
 
-/* 提示框：显示在输入框上方，渐变消失 */
 .toast{
   position:absolute;
   top:-28px;
@@ -100,11 +98,12 @@ input{
   background:#ff9000;
   color:#fff;
   border:none;
-  padding:2px 6px;
+  padding:1px 4px;
   border-radius:3px;
-  font-size:12px;
+  font-size:10px;
   cursor:pointer;
 }
+
 .check{
   position:fixed;
   bottom:30px;
@@ -117,7 +116,6 @@ input{
   cursor:pointer;
   box-shadow:0 4px 12px rgba(0,0,0,0.2);
 }
-/* 清空答案悬浮按钮，放在检查答案下方 */
 .reset-fixed{
   position:fixed;
   bottom:90px;
@@ -168,6 +166,14 @@ let current = null;
 let save = JSON.parse(localStorage.getItem('save')) || {};
 let study = JSON.parse(localStorage.getItem('study')) || {};
 let year = new Date().getFullYear();
+
+// 自动计时：每分钟自动加1分钟时长，不用点返回
+setInterval(() => {
+  const today = new Date().toISOString().split('T')[0];
+  study[today] = (study[today] || 0) + 1;
+  localStorage.setItem('study', JSON.stringify(study));
+  initHeat();
+}, 60000);
 
 window.onload = () => {
   fetch("articles.tsv")
@@ -225,11 +231,6 @@ function sv(aid, i, v) {
 }
 
 function back() {
-  if (current !== null) {
-    const today = new Date().toISOString().split('T')[0];
-    study[today] = (study[today] || 0) + 1;
-    localStorage.setItem('study', JSON.stringify(study));
-  }
   current = null;
   document.getElementById('page').style.display = 'none';
   document.getElementById('catalog').style.display = 'block';
@@ -265,7 +266,7 @@ function reset() {
   document.getElementById('score').style.display = 'none';
 }
 
-// 提示：显示在上方，6秒渐变消失
+// 提示总共停留5秒：4秒后开始渐变，1秒渐隐
 function ht(aid, i, btn) {
   const txt = articles.find(x => x.id === aid).ans[i];
   const group = btn.closest('.input-group');
@@ -273,37 +274,55 @@ function ht(aid, i, btn) {
   toast.className = 'toast';
   toast.innerText = txt;
   group.appendChild(toast);
-  setTimeout(() => toast.classList.add('fade'), 100);
-  setTimeout(() => toast.remove(), 1100);
+  setTimeout(() => toast.classList.add('fade'), 4000);
+  setTimeout(() => toast.remove(), 5000);
 }
 
 document.getElementById('yPrev').onclick = () => { year--; initHeat(); };
 document.getElementById('yNext').onclick = () => { year++; initHeat(); };
 document.getElementById('yReset').onclick = () => { year = new Date().getFullYear(); initHeat(); };
 
+// 获取对应分钟数的鼓励语
+function getMotivationText(totalMin) {
+  if(totalMin <= 30){
+    return "刚开始很棒，坚持住✨";
+  }else if(totalMin <= 100){
+    return "稳步积累，越来越稳👍";
+  }else if(totalMin <= 300){
+    return "自律拉满，进步飞快🚀";
+  }else if(totalMin <= 600){
+    return "超强毅力，太厉害了💪";
+  }else{
+    return "大神级坚持，日语稳了🎊";
+  }
+}
+
+// 根据当日学习分钟获取热力图等级
+function getHeatLevel(min) {
+  if(min <= 0) return 0;
+  if(min <= 15) return 1;
+  if(min <= 30) return 2;
+  if(min <= 60) return 3;
+  return 4;
+}
+
 function initHeat() {
   document.getElementById('yShow').innerText = year;
   const grid = document.getElementById('heatGrid');
   grid.innerHTML = '';
   const start = new Date(year, 0, 1);
-  const isMobile = window.innerWidth <= 480;
 
+  // 累计总分钟
   let totalMin = 0;
   for (let k in study) totalMin += study[k];
 
-  const messages = [
-    "继续加油！",
-    "坚持最棒！",
-    "你超厉害！",
-    "进步明显！",
-    "太棒啦！"
-  ];
-  const msg = messages[Math.min(Math.floor(totalMin/10), messages.length-1)];
-
+  // 鼓励语
+  const msg = getMotivationText(totalMin);
   document.getElementById('motivation').innerText =
     `累计学习：${totalMin} 分钟 | ${msg}`;
 
-  for (let w = 0; w < (isMobile ? 5 : 52); w++) {
+  // 全年热力图，按当日分钟深浅着色
+  for (let w = 0; w < 52; w++) {
     for (let d = 0; d < 7; d++) {
       const date = new Date(start);
       date.setDate(start.getDate() + w * 7 + d);
@@ -311,11 +330,11 @@ function initHeat() {
       const key = date.toISOString().split('T')[0];
       const cell = document.createElement('div');
       cell.className = 'heat-cell';
-      const c = study[key] || 0;
-      if (c >= 4) cell.classList.add('l4');
-      else if (c >= 3) cell.classList.add('l3');
-      else if (c >= 2) cell.classList.add('l2');
-      else if (c >= 1) cell.classList.add('l1');
+      const level = getHeatLevel(study[key] || 0);
+      if(level === 1) cell.classList.add('l1');
+      if(level === 2) cell.classList.add('l2');
+      if(level === 3) cell.classList.add('l3');
+      if(level === 4) cell.classList.add('l4');
       grid.appendChild(cell);
     }
   }
