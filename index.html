@@ -61,7 +61,6 @@ body{
   font-size:17px;
   line-height:1.8;
   margin:15px 0;
-  /* 整篇一段，首行缩进1个日语字符 */
   text-indent:1em;
 }
 
@@ -74,36 +73,45 @@ body{
   .catalog,.page{padding:12px 6px}
 }
 
+/* 容器紧贴文字，消除多余间距 */
 .input-group{
-  display:inline-block;
+  display:inline-flex;
+  align-items:baseline;
   position:relative;
-  margin:0 1px;
-  vertical-align:middle;
+  margin:0 2px;
 }
+
+/* 核心改造：输入框无痕融入原文 */
 input{
-  width:65px;
-  padding:3px 4px;
-  border:1px solid #ddd;
-  border-radius:3px;
-  font-size:14px;
+  border:none;
+  border-bottom:1px solid #ccc;
+  background:transparent;
+  width:auto;
+  min-width:4em;
+  padding:1px 2px;
+  margin:0;
+  outline:none;
+  font-size:inherit;
+  text-align:center;
 }
 @media (max-width:480px){
   input{
-    width:58px;
-    font-size:13px;
+    min-width:3.5em;
   }
 }
 
 .ans{
   position:absolute;
   bottom:-22px;
-  right:0;
+  left:50%;
+  transform:translateX(-50%);
   color:#7f5fff;
   background:#f3f0ff;
   padding:0 6px;
   border-radius:3px;
   display:none;
   white-space:nowrap;
+  font-size:12px;
 }
 
 .toast{
@@ -133,10 +141,10 @@ input{
   border-radius:3px;
   font-size:12px;
   cursor:pointer;
+  margin-left:2px;
 }
 
 /* ========== 按钮位置 最终正确版 ========== */
-/* 检查答案 → 在上面 */
 .check{
   position:fixed;
   bottom:80px;
@@ -149,7 +157,6 @@ input{
   cursor:pointer;
   box-shadow:0 4px 12px rgba(0,0,0,0.2);
 }
-/* 清空答案 → 在最下面（靠近屏幕边缘） */
 .reset-fixed{
   position:fixed;
   bottom:30px;
@@ -251,7 +258,6 @@ function initList() {
   });
 }
 
-// 取消按//自动分段，直接原样返回文本，只保留整体首行缩进
 function formatArticleText(rawText){
   return rawText;
 }
@@ -276,7 +282,6 @@ function render(art) {
       <div class="ans" id="a${art.id}_${i}"></div>
     </div>`;
   });
-  // 直接原样渲染，不分段
   box.innerHTML = html;
 }
 
