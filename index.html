@@ -107,60 +107,60 @@ input.wrong{
   border-bottom-color:#ff9999;
 }
 
+/* 正确答案框：调整透明度+好看的颜色+上移位置+强制居中 */
 .ans{
   position:absolute;
-  bottom:-22px;
-  left:50%;
-  transform:translateX(-50%);
-  color:#7f5fff;
-  background:rgba(243,240,255,0.6);
-  padding:0 6px;
-  border-radius:3px;
+  bottom:-18px; /* 上移，不遮挡文字 */
+  left:0;       /* 取消偏移，宽度自适应 */
+  width:100%;   /* 宽度和输入框一致 */
+  color:#2d5aff;/* 好看的深蓝色 */
+  background:rgba(220,230,255,0.85);/* 降低透明度，更清晰 */
+  padding:1px 4px;
+  border-radius:4px;
   display:none;
   white-space:nowrap;
   font-size:12px;
-  border:1px dashed rgba(127,95,255,0.3);
-  text-align:center;
+  border:1px solid rgba(76,123,255,0.4);/* 细边框 */
+  text-align:center;/* 强制居中 */
+  box-sizing:border-box;
 }
 
+/* 提示框：强制居中+宽度自适应 */
 .toast{
   position:absolute;
   top:-28px;
-  left:50%;
-  transform:translateX(-50%);
+  left:0;
+  width:100%;
   background:#333;
   color:#fff;
-  padding:3px 8px;
+  padding:3px 6px;
   border-radius:4px;
   font-size:12px;
   white-space:nowrap;
   opacity:1;
   transition:opacity 1s;
   z-index:10;
-  text-align:center;
+  text-align:center;/* 强制居中 */
+  box-sizing:border-box;
 }
 .toast.fade{
   opacity:0;
 }
 
-/* 提示按钮：固定在右上角，无视键盘，永久固定 */
-.floating-hint{
-  position:fixed;
-  top:10px;
-  right:10px;
-  background:#ff9900ee;
-  color:#fff;
-  width:44px;
-  height:44px;
+/* 移除悬浮提示按钮，改为输入框右侧小图标 */
+.hint-icon{
+  display:inline-block;
+  width:18px;
+  height:18px;
   border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:18px;
-  border:none;
-  box-shadow:0 4px 12px rgba(0,0,0,0.2);
+  background:#ff9900;
+  color:#fff;
+  font-size:10px;
+  text-align:center;
+  line-height:18px;
   cursor:pointer;
-  z-index:999999;
+  margin-left:2px;
+  user-select:none;
 }
 
 .check, .reset-fixed{
@@ -217,7 +217,7 @@ input.wrong{
 <div class="score" id="score" style="display:none"></div>
 </div>
 
-<button class="floating-hint" id="floatHint" onclick="showCurrentHint()">💡</button>
+<!-- 移除悬浮提示按钮 -->
 <button class="check" onclick="check()">Check</button>
 <button class="reset-fixed" onclick="reset()">Clear</button>
 
@@ -233,10 +233,6 @@ document.addEventListener('focusin', e => {
   if(e.target.tagName === 'INPUT' && e.target.dataset.i){
     currentFocusInput = e.target;
   }
-});
-
-document.getElementById('floatHint').addEventListener('mousedown', e => {
-  e.preventDefault();
 });
 
 setInterval(() => {
@@ -271,18 +267,21 @@ window.onload = () => {
   };
 };
 
-function showCurrentHint(){
-  if(!currentFocusInput || !current) return;
-  const i = currentFocusInput.dataset.i;
-  const ans = articles.find(x=>x.id===current).ans[i];
-  const g = currentFocusInput.closest('.input-group');
+// 提示功能：绑定到输入框右侧小图标
+function showHint(aid, i, el) {
+  const art = articles.find(x=>x.id===aid);
+  if(!art) return;
+  const ans = art.ans[i];
+  const g = el.closest('.input-group');
   const t = document.createElement('div');
   t.className = 'toast';
   t.innerText = ans;
   g.appendChild(t);
   setTimeout(()=>t.classList.add('fade'),4000);
   setTimeout(()=>t.remove(),5000);
-  currentFocusInput.focus();
+  // 保持输入框聚焦
+  const input = g.querySelector('input');
+  if(input) input.focus();
 }
 
 function initList() {
@@ -313,8 +312,10 @@ function render(art) {
     const len = ans.length;
     let w = len <=4 ? len+1 : 5;
     const v = save[art.id]?.[i] || '';
+    // 输入框右侧加提示小图标，替代悬浮按钮
     return `<div class="input-group">
       <input type="text" style="width:${w}em" data-i="${i}" value="${v}" oninput="sv(${art.id},${i},this.value)">
+      <span class="hint-icon" onclick="showHint(${art.id},${i},this)">💡</span>
       <div class="ans" id="a${current}_${i}"></div>
     </div>`;
   });
@@ -334,7 +335,6 @@ function back() {
   initHeat();
 }
 
-// ========== 核心修改：正确不显示答案，错误/空才显示 ==========
 function check() {
   const art = articles.find(a => a.id === current);
   const inputs = document.querySelectorAll('input[data-i]');
@@ -349,7 +349,6 @@ function check() {
     
     const ansEl = document.getElementById(`a${current}_${i}`);
     ansEl.innerText = art.ans[i];
-    // 正确：不显示答案；错误/空：显示答案
     ansEl.style.display = ok ? 'none' : 'block';
   });
   const rate = total?Math.round(right/total*100):0;
