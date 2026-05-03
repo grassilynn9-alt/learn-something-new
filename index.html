@@ -45,7 +45,7 @@ body{
   width:100%;
   overflow-x:auto;
 }
-.heat-cell{width:10px;height:10px;background:#ebedf0}
+.heat-cell{width:10px;height:10px;background:#ebedf0; cursor: pointer;}
 .heat-cell.l1{background:#c6e8b8}
 .heat-cell.l2{background:#7bc96f}
 .heat-cell.l3{background:#239a3f}
@@ -107,7 +107,6 @@ input.wrong{
   border-bottom-color:#ff9999;
 }
 
-/* 正确答案框：极小padding + 柔和协调颜色 */
 .ans{
   position:absolute;
   bottom:-18px;
@@ -125,7 +124,6 @@ input.wrong{
   box-sizing:border-box;
 }
 
-/* 提示框文字居中 */
 .toast{
   position:absolute;
   top:-28px;
@@ -147,7 +145,6 @@ input.wrong{
   opacity:0;
 }
 
-/* 提示按钮：仅橙色圆形 + 不遮挡文字 + 柔和颜色 */
 .hint-icon{
   display:inline-block;
   width:14px;
@@ -252,7 +249,6 @@ window.onload = () => {
       initHeat();
     });
 
-  // 修复：刷新按钮点击事件
   document.getElementById('refreshBtn').onclick = () => initHeat();
   document.getElementById('clearTodayBtn').onclick = () => {
     const today = new Date().toISOString().split('T')[0];
@@ -264,7 +260,6 @@ window.onload = () => {
   };
 };
 
-// 提示功能
 function showHint(aid, i, el) {
   const art = articles.find(x=>x.id===aid);
   if(!art) return;
@@ -381,6 +376,34 @@ function getHeatLevel(min) {
   return 4;
 }
 
+// 清除指定日期记录（优化弹窗提示）
+function clearDateRecord(dateStr) {
+  const date = new Date(dateStr);
+  const y = date.getFullYear();
+  const m = (date.getMonth() + 1).toString().padStart(2, '0');
+  const d = date.getDate().toString().padStart(2, '0');
+  
+  const minutes = study[dateStr] || 0;
+  let timeText = '';
+  if (minutes === 0) {
+    timeText = '学习时长：0分钟';
+  } else if (minutes < 60) {
+    timeText = `学习时长：${minutes} 分钟`;
+  } else {
+    const hour = Math.floor(minutes / 60);
+    const min = minutes % 60;
+    timeText = min > 0 ? `学习时长：${hour} 小时 ${min} 分钟` : `学习时长：${hour} 小时`;
+  }
+
+  const msg = `${y}年${m}月${d}日\n${timeText}\n\n确定要删除该记录吗？`;
+  
+  if(confirm(msg)){
+    delete study[dateStr];
+    localStorage.setItem('study', JSON.stringify(study));
+    initHeat();
+  }
+}
+
 function initHeat() {
   document.getElementById('yShow').innerText = year;
   const grid = document.getElementById('heatGrid');
@@ -409,6 +432,10 @@ function initHeat() {
       if(level === 2) cell.classList.add('l2');
       if(level === 3) cell.classList.add('l3');
       if(level === 4) cell.classList.add('l4');
+      
+      // 点击日期格子删除当天记录
+      cell.onclick = () => clearDateRecord(key);
+      
       grid.appendChild(cell);
     }
   }
