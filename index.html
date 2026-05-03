@@ -119,7 +119,7 @@ input.wrong{
   display:none;
   white-space:nowrap;
   font-size:12px;
-  border:1px solid rgba(100,140,255,0.3);
+  border:1px solid rgba(100,140,250,0.3);
   text-align:center;
   box-sizing:border-box;
 }
@@ -376,7 +376,23 @@ function getHeatLevel(min) {
   return 4;
 }
 
-// 清除指定日期记录（优化弹窗提示）
+// 学习激励语（随机弹出）
+const motivateTexts = [
+  "今天也要加油呀✨ 学习一小步，进步一大步！",
+  "空白的日子是用来蓄力的📖 快去学习吧！",
+  "你超棒的🌟 现在开始学习刚刚好！",
+  "学习从不嫌晚⏰ 行动起来就赢啦！",
+  "悄悄努力，然后惊艳所有人💪",
+  "今天的你也很值得被肯定呀🥰 去学习吧！",
+  "每一份努力都不会白费🌟 冲鸭！",
+  "坚持下去，你会感谢现在的自己✨",
+  "学习是最划算的投资📚 现在就开始！",
+  "元气满满去学习啦🥳 你一定可以！",
+  "哪怕只学一分钟，也是在进步呀💡",
+  "未来的你，一定会感谢现在努力的自己💖"
+];
+
+// 清除指定日期记录（最终优化版）
 function clearDateRecord(dateStr) {
   const date = new Date(dateStr);
   const y = date.getFullYear();
@@ -384,10 +400,18 @@ function clearDateRecord(dateStr) {
   const d = date.getDate().toString().padStart(2, '0');
   
   const minutes = study[dateStr] || 0;
-  let timeText = '';
+
+  // ============== 核心逻辑 ==============
+  // 学习时长 = 0 → 弹出随机激励语
   if (minutes === 0) {
-    timeText = '学习时长：0分钟';
-  } else if (minutes < 60) {
+    const randomText = motivateTexts[Math.floor(Math.random() * motivateTexts.length)];
+    alert(randomText);
+    return;
+  }
+
+  // 学习时长 > 0 → 正常显示删除确认
+  let timeText = '';
+  if (minutes < 60) {
     timeText = `学习时长：${minutes} 分钟`;
   } else {
     const hour = Math.floor(minutes / 60);
@@ -433,7 +457,6 @@ function initHeat() {
       if(level === 3) cell.classList.add('l3');
       if(level === 4) cell.classList.add('l4');
       
-      // 点击日期格子删除当天记录
       cell.onclick = () => clearDateRecord(key);
       
       grid.appendChild(cell);
