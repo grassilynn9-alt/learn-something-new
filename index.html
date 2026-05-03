@@ -48,8 +48,8 @@ body{
 .heat-cell{width:10px;height:10px;background:#ebedf0; cursor: pointer;}
 .heat-cell.l1{background:#c6e8b8}
 .heat-cell.l2{background:#7bc96f}
-.heat-cell.l3{background:#239a3f}
-.heat-cell.l4{background:#196127}
+.heat-cell.l3{background:#23a3f}
+.heat-cell.l4{background:#19127}
 
 .heat-info{text-align:center;padding:10px;background:#f9f9fb;border-radius:8px;margin-top:10px}
 .catalog{background:#fff;border-radius:12px;padding:15px 10px;margin-bottom:20px}
@@ -66,119 +66,47 @@ body{
 
 @media (max-width:480px){
   body{
-    padding:8px 4px;
-    font-size:15px;
-    padding-bottom:160px;
+    padding:8px 4px;font-size:15px;padding-bottom:160px
   }
   .text{font-size:15px;line-height:1.7}
   .catalog,.page{padding:12px 6px}
 }
 
 .input-group{
-  display:inline-flex;
-  align-items:baseline;
-  position:relative;
-  margin:0 2px;
+  display:inline-flex;align-items:baseline;position:relative;margin:0 2px
 }
 
 input{
-  border:none;
-  border-bottom:1.5px solid #003377;
-  background:transparent;
-  padding:1px 2px;
-  margin:0;
-  outline:none;
-  text-align:center;
-  font-size:inherit;
-  white-space:nowrap;
-  overflow:visible;
-  border-radius:0;
-  box-shadow:none;
-  -webkit-appearance:none;
-  transition: all 0.2s;
+  border:none;border-bottom:1.5px solid #003377;background:transparent;padding:1px 2px;margin:0;outline:none;text-align:center;font-size:inherit;white-space:nowrap;overflow:visible;border-radius:0;box-shadow:none;-webkit-appearance:none;transition: all 0.2s
 }
 
 input.correct{
-  color:#006633;
-  border-bottom-color:#66bb99;
+  color:#00633;border-bottom-color:#66bb99
 }
 input.wrong{
-  color:#990000;
-  border-bottom-color:#ff9999;
+  color:#90000;border-bottom-color:#ff9999
 }
 
 .ans{
-  position:absolute;
-  bottom:-18px;
-  left:0;
-  width:100%;
-  color:#3b6dff;
-  background:rgba(230,235,255,0.75);
-  padding:0 3px;
-  border-radius:3px;
-  display:none;
-  white-space:nowrap;
-  font-size:12px;
-  border:1px solid rgba(100,140,250,0.3);
-  text-align:center;
-  box-sizing:border-box;
+  position:absolute;bottom:-18px;left:0;width:100%;color:#3b6dff;background:rgba(230,235,255,0.75);padding:0 3px;border-radius:3px;display:none;white-space:nowrap;font-size:12px;border:1px solid rgba(100,140,250,0.3);text-align:center;box-sizing:border-box
 }
 
 .toast{
-  position:absolute;
-  top:-28px;
-  left:0;
-  width:100%;
-  background:#333;
-  color:#fff;
-  padding:3px 6px;
-  border-radius:4px;
-  font-size:12px;
-  white-space:nowrap;
-  opacity:1;
-  transition:opacity 1s;
-  z-index:10;
-  text-align:center;
-  box-sizing:border-box;
+  position:absolute;top:-28px;left:0;width:100%;background:#333;color:#fff;padding:3px 6px;border-radius:4px;font-size:12px;white-space:nowrap;opacity:1;transition:opacity 1s;z-index:10;text-align:center;box-sizing:border-box
 }
 .toast.fade{
-  opacity:0;
+  opacity:0
 }
 
 .hint-icon{
-  display:inline-block;
-  width:14px;
-  height:14px;
-  border-radius:50%;
-  background:#ffb366;
-  margin-left:4px;
-  cursor:pointer;
-  user-select:none;
-  flex-shrink:0;
+  display:inline-block;width:14px;height:14px;border-radius:50%;background:#ffb366;margin-left:4px;cursor:pointer;user-select:none;flex-shrink:0
 }
 
 .check, .reset-fixed{
-  position:fixed;
-  right:20px;
-  padding:10px 14px;
-  border-radius:50px;
-  border:none;
-  cursor:pointer;
-  box-shadow:0 4px 12px rgba(0,0,0,0.15);
-  font-size:14px;
-  z-index:999;
+  position:fixed;right:20px;padding:10px 14px;border-radius:50px;border:none;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-size:14px;z-index:999
 }
-.reset-fixed{
-  bottom:30px;
-  background:#666666bb;
-  color:#fff;
-}
-.check{
-  bottom:90px;
-  background:#2385bbee;
-  color:#fff;
-}
-
+.reset-fixed{bottom:30px;background:#666666bb;color:#fff}
+.check{bottom:90px;background:#2385bbee;color:#fff}
 .score{background:#f6f9ff;padding:15px 10px;border-radius:10px;margin:15px 0}
 </style>
 </head>
@@ -186,7 +114,6 @@ input.wrong{
 
 <div class="heat">
 <div class="heat-top-wrap">
-  <button class="heat-btn" id="refreshBtn">⟳</button>
   <div class="heat-bar">
     <button class="heat-btn" id="yPrev">←</button>
     <span id="yShow">2026</span>
@@ -249,7 +176,6 @@ window.onload = () => {
       initHeat();
     });
 
-  document.getElementById('refreshBtn').onclick = () => initHeat();
   document.getElementById('clearTodayBtn').onclick = () => {
     const today = new Date().toISOString().split('T')[0];
     if(confirm("确定清除今日时间？")){
@@ -376,7 +302,6 @@ function getHeatLevel(min) {
   return 4;
 }
 
-// 学习激励语（随机弹出）
 const motivateTexts = [
   "今天也要加油呀✨ 学习一小步，进步一大步！",
   "空白的日子是用来蓄力的📖 快去学习吧！",
@@ -392,7 +317,6 @@ const motivateTexts = [
   "未来的你，一定会感谢现在努力的自己💖"
 ];
 
-// 清除指定日期记录（最终优化版）
 function clearDateRecord(dateStr) {
   const date = new Date(dateStr);
   const y = date.getFullYear();
@@ -401,15 +325,12 @@ function clearDateRecord(dateStr) {
   
   const minutes = study[dateStr] || 0;
 
-  // ============== 核心逻辑 ==============
-  // 学习时长 = 0 → 弹出随机激励语
   if (minutes === 0) {
     const randomText = motivateTexts[Math.floor(Math.random() * motivateTexts.length)];
     alert(randomText);
     return;
   }
 
-  // 学习时长 > 0 → 正常显示删除确认
   let timeText = '';
   if (minutes < 60) {
     timeText = `学习时长：${minutes} 分钟`;
